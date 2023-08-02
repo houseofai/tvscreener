@@ -1,3 +1,17 @@
+main = {'columns':
+        # 'logoid',
+            {'name': 'Name',
+             'description': 'Description',
+             'type': 'Type', 'subtype': 'Subtype',
+             'pricescale': 'Price Scale',
+             'minmov': 'Min Move',
+             'fractional': 'Fractional',
+             'minmove2': 'Min Move 2',
+             'currency': 'Currency',
+             'fundamental_currency_code': 'Fundamental Currency Code',
+             }
+        }
+
 stock = {
     'markets': [
         'america',
@@ -605,4 +619,3 @@ forex = {
                 'Perf.Y': 'Yearly Performance',
                 'Perf.YTD': 'YTD Performance'},
 }
-

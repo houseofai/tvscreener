@@ -19,20 +19,6 @@ class TimeInterval(Enum):
     ONE_WEEK = "update_mode|1W"
 
 
-main_columns = [
-    # "logoid",
-    "name",
-    "description",
-    "type", "subtype",
-    "pricescale",
-    "minmov",
-    "fractional",
-    "minmove2",
-    "currency",
-    "fundamental_currency_code"
-]
-
-
 class FilterOperation(Enum):
     BELOW = "less"
     BELOW_OR_EQUAL = "eless"
@@ -85,7 +71,7 @@ class Screener:
 
         self.range = None
 
-        self.columns = main_columns.copy()
+        self.columns = list(tvdata.main['columns'].keys())
         self.set_range()
         # self.add_filter("type", "equal", subtype)
         self.add_option("lang", "en")
@@ -145,8 +131,8 @@ class Screener:
 
         res = requests.post(self.url, data=payload_json)
         if res.status_code == 200:
-            res_data = [d["d"] for d in res.json()['data']]
-            return pd.DataFrame(res_data, columns=payload["columns"])
+            r = [d["d"] for d in res.json()['data']]
+            return pd.DataFrame(r, columns=payload["columns"])
         else:
             print(f"Error: {res.status_code}")
             print(res.text)
@@ -159,16 +145,28 @@ class StockScreener(Screener):
         self.columns.extend(tvdata.stock['columns'].keys())
         self.sort_by("market_cap_basic", "desc")
 
+    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+        df = super().get(time_interval, print_request)
+        return df.rename(columns=tvdata.stock['columns'])
+
 
 class ForexScreener(Screener):
     def __init__(self):
         super().__init__("forex")
         self.columns.extend(tvdata.forex['columns'].keys())
 
+    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+        df = super().get(time_interval, print_request)
+        return df.rename(columns=tvdata.forex['columns'])
+
 
 class CryptoScreener(Screener):
     def __init__(self):
         super().__init__("crypto")
         self.columns.extend(tvdata.crypto['columns'].keys())
+
+    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+        df = super().get(time_interval, print_request)
+        return df.rename(columns=tvdata.crypto['columns'])
 
 
