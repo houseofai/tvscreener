@@ -1,4 +1,4 @@
-# TradingView Screener library
+# TradingView Screener Scraper
 
 Retrieve data from TradingView screener for Stocks, Forex and Crypto into a Pandas dataframe.
 
