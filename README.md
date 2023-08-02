@@ -8,7 +8,7 @@ Check the Jupyter Notebook in the notebooks folder for examples.
 
 ## Installation
 ```
-pip install git@github.com:houseofai/tradingview-screener.git
+pip install git+https://github.com/houseofai/tradingview-screener@main
 ```
 ## Usage
 For Stocks screener:
