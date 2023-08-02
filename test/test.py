@@ -19,5 +19,3 @@ class TestScreener(unittest.TestCase):
         ss = ForexScreener()
         df = ss.get()
         self.assertTrue(len(df) > 0)
-
-
