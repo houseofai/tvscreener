@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 
 import pandas as pd
 import requests
@@ -12,6 +13,20 @@ update_modes = {"1": "update_mode|1",
                 "240": "update_mode|240",
                 "1D": "update_mode|1D",
                 "1W": "update_mode|1W"}
+
+
+# Make update_modes as an Enum class
+class TimeFrame(Enum):
+    ONE_MINUTE = "update_mode|1"
+    FIVE_MINUTES = "update_mode|5"
+    FIFTEEN_MINUTES = "update_mode|15"
+    THIRTY_MINUTES = "update_mode|30"
+    SIXTY_MINUTES = "update_mode|60"
+    TWO_HOURS = "update_mode|120"
+    FOUR_HOURS = "update_mode|240"
+    ONE_DAY = "update_mode|1D"
+    ONE_WEEK = "update_mode|1W"
+
 
 main_columns = ["logoid", "name", "description", "type", "subtype", "pricescale", "minmov", "fractional",
                 "minmove2",
@@ -74,8 +89,8 @@ class Screener:
     def set_range(self, from_range=0, to_range=10000):
         self.range = [from_range, to_range]
 
-    def set_update_mode(self, update_mode="1D"):
-        self.update_mode = update_modes[update_mode]
+    def set_time_frame(self, time_frame=TimeFrame.ONE_DAY):
+        self.update_mode = time_frame.value
 
     def set_symbols(self, symbols):
         self.symbols = symbols
