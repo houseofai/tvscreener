@@ -2,6 +2,7 @@
 
 Retrieve data from TradingView screener for Stocks, Forex and Crypto into a Pandas dataframe.
 
+Check the Jupyter Notebook in the notebooks folder for examples.
 ![dataframe.png](images%2Fdataframe.png)
 
 
