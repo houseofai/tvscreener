@@ -1,3 +1,5 @@
+from enum import Enum
+
 main = {'columns':
         # 'logoid',
             {'name': 'Name',
@@ -619,3 +621,5 @@ forex = {
                 'Perf.Y': 'Yearly Performance',
                 'Perf.YTD': 'YTD Performance'},
 }
+
+

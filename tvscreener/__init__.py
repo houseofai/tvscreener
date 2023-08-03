@@ -1,3 +1,5 @@
+import math
+
 from tvscreener import tvdata
 import json
 from enum import Enum
@@ -9,6 +11,25 @@ default_market = ["america"]
 default_min_range = 0
 default_max_range = 150
 default_sort_stocks = "market_cap_basic"
+
+
+def find_ratings(value):
+    for rating in Ratings:
+        if rating.min <= value <= rating.max:
+            return rating
+
+
+class Ratings(Enum):
+    STRONG_BUY = 0.5, 1, "Strong Buy"
+    BUY = 0.1, 0.5, "Buy"
+    NEUTRAL = -0.1, 0.1, "Neutral"
+    SELL = -0.5, -0.1, "Sell"
+    STRONG_SELL = -1, -0.5, "Strong Sell"
+
+    def __init__(self, min_, max_, label):
+        self.min = min_
+        self.max = max_
+        self.label = label
 
 
 class TimeInterval(Enum):
@@ -128,13 +149,14 @@ class Screener:
             "filter": self.filters if self.filters else [],
             "options": self.options,
             "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
-            "markets": self.markets if self.markets else default_market, "sort": self.sort,
+            "markets": list(self.markets) if self.markets else default_market,
+            "sort": self.sort,
             "range": self.range,
             "columns": clean_columns(self.columns)
         }
         return payload
 
-    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
 
         # Time Interval
         self.columns.append(time_interval.value)
@@ -150,7 +172,10 @@ class Screener:
         res = requests.post(self.url, data=payload_json)
         if res.status_code == 200:
             r = [d["d"] for d in res.json()['data']]
-            return pd.DataFrame(r, columns=payload["columns"])
+            df = pd.DataFrame(r, columns=payload["columns"])
+            if beautify:
+                df = Beautify(df).df
+            return df
         else:
             print(f"Error: {res.status_code}")
             print(res.text)
@@ -163,8 +188,8 @@ class StockScreener(Screener):
         self.columns.extend(tvdata.stock['columns'].keys())
         self.sort_by(default_sort_stocks, "desc")
 
-    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
-        df = super().get(time_interval, print_request)
+    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
+        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
         return df.rename(columns=tvdata.stock['columns'])
 
 
@@ -173,8 +198,8 @@ class ForexScreener(Screener):
         super().__init__("forex")
         self.columns.extend(tvdata.forex['columns'].keys())
 
-    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
-        df = super().get(time_interval, print_request)
+    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
+        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
         return df.rename(columns=tvdata.forex['columns'])
 
 
@@ -183,6 +208,65 @@ class CryptoScreener(Screener):
         super().__init__("crypto")
         self.columns.extend(tvdata.crypto['columns'].keys())
 
-    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
-        df = super().get(time_interval, print_request)
+    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
+        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
         return df.rename(columns=tvdata.crypto['columns'])
+
+
+def get_number_group(number):
+    for group in NumberGroup:
+        if number in group:
+            return group
+    return None
+
+
+millnames = ['', '', 'M', 'B', '']
+
+
+def millify(n):
+    n = float(n)
+    millidx = max(0, min(len(millnames) - 1,
+                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+    return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+
+
+class NumberGroup(Enum):
+    MILLION = 10e6, 10e9, "M",
+    BILLION = 10e9, 10e12, "B",
+
+    def __init__(self, min_, max_, label):
+        self.min = min_
+        self.max = max_
+        self.label = label
+
+    def __contains__(self, item):
+        return self.min <= item < self.max
+
+
+class Beautify:
+    mappings = {
+        'Recommend.All': 'Technical Rating raw',
+        'Recommend.MA': 'Moving Averages Rating raw',
+        'Recommend.Other': 'Oscillators Rating raw',
+        'dividends_paid': 'Dividends Paid (FY) raw',
+    }
+
+    def __init__(self, df):
+        self.df = df
+        self._rating('Recommend.All')
+        self._rating('Recommend.MA')
+        self._rating('Recommend.Other')
+        self._replace_nan('dividends_paid')
+        self._number_group('dividends_paid')
+
+    def _rating(self, column):
+        self.df[self.mappings[column]] = self.df[column]
+        self.df[column] = self.df[column].apply(lambda x: find_ratings(x).label)
+
+    def _number_group(self, column):
+        self.df[self.mappings[column]] = self.df[column]
+        self.df[column] = self.df[column].apply(lambda x: millify(x))
+
+    def _replace_nan(self, column):
+        self.df[column] = self.df[column].fillna(0)
