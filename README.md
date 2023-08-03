@@ -1,8 +1,16 @@
-# TradingView Screener Scraper
+# TradingView Screener API
 
-Retrieve data from TradingView screener for Stocks, Forex and Crypto into a Pandas dataframe.
+Python library to retrieve data from TradingView Screener.
 
-Check the Jupyter Notebook in the notebooks folder for examples.
+![tradingview-screener.png](images%2Ftradingview-screener.png)
+
+# Features
+- Query Stock, Forex and Crypto Screener
+- Query all the fields available
+- Query any time interval
+- Filters by any fields, symbols, markets, countries, etc.
+- Get the results as a Pandas Dataframe
+- 
 ![dataframe.png](images%2Fdataframe.png)
 
 
@@ -11,6 +19,7 @@ Check the Jupyter Notebook in the notebooks folder for examples.
 pip install git+https://github.com/houseofai/tradingview-screener@main
 ```
 ## Usage
+
 For Stocks screener:
 ```
 import tvscreener as tvs
@@ -18,7 +27,7 @@ import tvscreener as tvs
 ss = tvs.StockScreener()
 df = ss.get()
 
-# ... do something with the dataframe
+# ... returns a dataframe with 150 rows by default
 ``` 
 For Forex screener:
 ```
@@ -26,8 +35,6 @@ import tvscreener as tvs
 
 fs = tvs.ForexScreener()
 df = fs.get()
-
-# ... do something with the dataframe
 ```
 For Crypto screener:
 ```
@@ -35,8 +42,6 @@ import tvscreener as tvs
 
 cs = tvs.CryptoScreener()
 df = cs.get()
-
-# ... do something with the dataframe
 ```
 
 ## Options
@@ -47,6 +52,10 @@ By default, it gets the 150 first results. You can change this by setting the `r
 ss = tvs.StockScreener()
 ss.set_range(0, 10000)
 df = ss.get()
+
+# or to get the last 500 rows:
+ss.set_range(9500, 10000)
+df = ss.get()
 ```
 
 ### Sorting
@@ -56,7 +65,7 @@ ss = tvs.StockScreener()
 ss.sort_by('market_cap_basic', 'desc')
 df = ss.get()
 ```
-Note that `market_cap_basic` is the default sorting option.
+Note that `market_cap_basic` is the default sorting option for stocks
 
 ## Filters
 
@@ -66,12 +75,14 @@ Filter by markets:
 Default: america
 ```
 ss = tvs.StockScreener()
-ss.set_markets('america')
+ss.set_markets('america') # or ss.set_markets('america', 'france', 'japan')
 df = ss.get()
 ```
 You can list the markets with:
 ```
-print(tvs.data.markets)
+from tvscreener import tvdata
+
+print(tvdata.stock['markets'])
 ```
 
 ### By Columns

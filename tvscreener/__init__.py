@@ -7,27 +7,14 @@ from enum import Enum
 import pandas as pd
 import requests
 
+from tvscreener.filter import FilterOperator, Filter, Ratings
+
 default_market = ["america"]
 default_min_range = 0
 default_max_range = 150
 default_sort_stocks = "market_cap_basic"
-
-
-class Ratings(Enum):
-    STRONG_BUY = 0.5, 1, "Strong Buy"
-    BUY = 0.1, 0.5, "Buy"
-    NEUTRAL = -0.1, 0.1, "Neutral"
-    SELL = -0.5, -0.1, "Sell"
-    STRONG_SELL = -1, -0.5, "Strong Sell"
-    UNKNOWN = math.nan, math.nan, "Unknown"
-
-    def __init__(self, min_, max_, label):
-        self.min = min_
-        self.max = max_
-        self.label = label
-
-    def __contains__(self, item):
-        return self.min <= item <= self.max
+default_sort_crypto = "24h_vol|5"
+default_sort_forex = "name"
 
 
 def find_ratings(value: float) -> Ratings:
@@ -38,53 +25,18 @@ def find_ratings(value: float) -> Ratings:
 
 
 class TimeInterval(Enum):
-    ONE_MINUTE = "update_mode|1"
-    FIVE_MINUTES = "update_mode|5"
-    FIFTEEN_MINUTES = "update_mode|15"
-    THIRTY_MINUTES = "update_mode|30"
-    SIXTY_MINUTES = "update_mode|60"
-    TWO_HOURS = "update_mode|120"
-    FOUR_HOURS = "update_mode|240"
-    ONE_DAY = "update_mode|1D"
-    ONE_WEEK = "update_mode|1W"
+    ONE_MINUTE = "1"
+    FIVE_MINUTES = "5"
+    FIFTEEN_MINUTES = "15"
+    THIRTY_MINUTES = "30"
+    SIXTY_MINUTES = "60"
+    TWO_HOURS = "120"
+    FOUR_HOURS = "240"
+    ONE_DAY = "1D"
+    ONE_WEEK = "1W"
 
-
-class FilterOperation(Enum):
-    BELOW = "less"
-    BELOW_OR_EQUAL = "eless"
-    ABOVE = "greater"
-    ABOVE_OR_EQUAL = "egreater"
-    CROSSES = "crosses"
-    CROSSES_UP = "crosses_above"
-    CROSSES_DOWN = "crosses_below"
-    IN_RANGE = "in_range"
-    NOT_IN_RANGE = "not_in_range"
-    EQUAL = "equal"
-    NOT_EQUAL = "nequal"
-
-
-def clean_columns(columns):
-    to_remove = ['change.60',
-                 'change_abs.60',
-                 'change.1',
-                 'change_abs.1',
-                 'change.1M',
-                 'change_abs.1M',
-                 'change.1W',
-                 'change_abs.1W',
-                 'change.240',
-                 'change_abs.240',
-                 'change.5',
-                 'change_abs.5',
-                 'change.15',
-                 'change_abs.15',
-                 'change_from_open',
-                 'change_from_open_abs',
-                 'candlestick',
-                 'relative_volume_intraday.5']
-
-    columns = [e for e in columns if e not in to_remove]
-    return list(dict.fromkeys(columns))
+    def update_mode(self):
+        return f"update_mode|{self.value}"
 
 
 def get_url(subtype):
@@ -98,40 +50,29 @@ class Screener:
         self.url = None
         self.filters = []
         self.options = {}
-        # self.markets = set()
         self.symbols = None
+        self.misc = {}
 
         self.range = None
         self.set_range()
         self.columns = tvdata.main['columns']
-        # self.add_filter("type", "equal", subtype)
         self.add_option("lang", "en")
 
-    def _add_filter_in_range(self, filter_, values):
-        filter_val = {"left": filter_, "operation": FilterOperation.IN_RANGE.value, "right": values}
-        self.filters.append(filter_val)
+    def add_prebuilt_filter(self, filter_: Filter):
+        self.filters.append(filter_.to_dict())
 
-    def _add_filter_equal(self, filter_, values):
-        filter_val = {"left": filter_, "operation": FilterOperation.EQUAL.value, "right": values}
+    def add_filter(self, filter_, operation: FilterOperator = None, values=None):
+        filter_val = {"left": filter_, "operation": operation.value, "right": values}
         self.filters.append(filter_val)
-
-    def add_filter(self, filter_, operation: FilterOperation = None, values=None):
-        if isinstance(values, list):
-            self._add_filter_in_range(filter_, values)
-        elif isinstance(values, bool):
-            self._add_filter_equal(filter_, values)
-        else:
-            filter_val = {"left": filter_, "operation": operation.value, "right": values}
-            self.filters.append(filter_val)
 
     def add_option(self, key, value):
         self.options[key] = value
 
+    def add_misc(self, key, value):
+        self.misc[key] = value
+
     def set_range(self, from_range: int = default_min_range, to_range: int = default_max_range) -> None:
         self.range = [from_range, to_range]
-
-    # def set_symbols(self, symbols):
-    #    self.symbols = symbols
 
     def sort_by(self, sort_by, order="desc"):
         self.sort = {"sortBy": sort_by, "sortOrder": order}
@@ -143,7 +84,8 @@ class Screener:
             "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
             "sort": self.sort,
             "range": self.range,
-            "columns": requested_columns_
+            "columns": requested_columns_,
+            **self.misc
         }
         return payload
 
@@ -152,13 +94,17 @@ class Screener:
         # requested_columns = clean_columns(requested_columns)
         return requested_columns
 
-    def _build_dataframe(self, response, requested_columns, beautify=True):
+    def _build_dataframe(self, response, requested_columns, time_interval: TimeInterval, beautify=True):
         # Parse response
         data = [[d["s"]] + d["d"] for d in response.json()['data']]
 
         # Build labels for the dataframe
         requested_column_labels = ['Symbol'] + [self.columns[k]['label'] if k in self.columns else k for k in
                                                 requested_columns]
+
+        # Default is one day, so there is no need to format the columns
+        if time_interval is not TimeInterval.ONE_DAY:
+            requested_column_labels.append('Time Interval')
 
         # Build dataframe
         df = pd.DataFrame(data, columns=requested_column_labels)  # payload["columns"])
@@ -167,15 +113,29 @@ class Screener:
             df = Beautify(df, self.columns).df
         return df
 
+    def _add_time_interval_to_columns(self, time_interval: TimeInterval, columns: list):
+        # Default is one day, so there is no need to format the columns
+        if time_interval is TimeInterval.ONE_DAY:
+            return columns
+
+        new_columns = []
+        for column in columns:
+            v = self.columns[column]
+            if "interval" in v and v["interval"]:
+                new_columns.append(f"{column}|{time_interval.value}")
+            else:
+                new_columns.append(column)
+        new_columns.append(time_interval.update_mode())
+        return new_columns
+
     def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
 
-        requested_columns = self._build_columns()
-        # requested_columns = clean_columns(requested_columns)
+        initial_columns = list(self.columns.keys())  # self._build_columns()
 
         # Time Interval
-        requested_columns.append(time_interval.value)
+        timeframed_columns = self._add_time_interval_to_columns(time_interval, initial_columns)
 
-        payload = self._build_payload(requested_columns)
+        payload = self._build_payload(timeframed_columns)
         payload_json = json.dumps(payload, indent=4)
 
         if print_request:
@@ -185,7 +145,7 @@ class Screener:
 
         res = requests.post(self.url, data=payload_json)
         if res.status_code == 200:
-            return self._build_dataframe(res, requested_columns, beautify)
+            return self._build_dataframe(res, initial_columns, time_interval, beautify)
         else:
             print(f"Error: {res.status_code}")
             print(res.text)
@@ -196,8 +156,6 @@ class StockScreener(Screener):
 
     def __init__(self):
         super().__init__()
-        # self.subtype_columns = tvdata.stock['columns']
-        # self.columns.extend(self.subtype_columns.keys())
         self.markets = set()
 
         self.url = get_url("global")
@@ -226,13 +184,20 @@ class ForexScreener(Screener):
         super().__init__()
         self.url = get_url("forex")
         self.columns = {**self.columns, **tvdata.forex['columns']}
+        # self.add_filter("sector", FilterOperation.IN_RANGE, ['Major', 'Minor'])
+        self.sort_by(default_sort_forex, "asc")
+        self.add_misc("symbols", {"query": {"types": ["forex"]}})
+        self.add_misc("markets", ["forex"])
 
 
 class CryptoScreener(Screener):
     def __init__(self):
         super().__init__()
+        self.markets = set("crypto")
         self.url = get_url("crypto")
         self.columns = {**self.columns, **tvdata.crypto['columns']}
+        self.sort_by(default_sort_crypto, "desc")
+        self.add_misc("price_conversion", {"to_symbol": False})
 
 
 millnames = ['', '', 'M', 'B', '']
