@@ -1,10 +1,14 @@
-
 from tvscreener import tvdata
 import json
 from enum import Enum
 
 import pandas as pd
 import requests
+
+default_market = ["america"]
+default_min_range = 0
+default_max_range = 150
+default_sort_stocks = "market_cap_basic"
 
 
 class TimeInterval(Enum):
@@ -24,8 +28,12 @@ class FilterOperation(Enum):
     BELOW_OR_EQUAL = "eless"
     ABOVE = "greater"
     ABOVE_OR_EQUAL = "egreater"
-    EQUAL = "equal"
+    CROSSES = "crosses"
+    CROSSES_UP = "crosses_above"
+    CROSSES_DOWN = "crosses_below"
     IN_RANGE = "in_range"
+    NOT_IN_RANGE = "not_in_range"
+    EQUAL = "equal"
     NOT_EQUAL = "nequal"
 
 
@@ -58,14 +66,13 @@ def get_url(subtype):
 
 
 class Screener:
-    default_market = ["america"]
 
     def __init__(self, subtype):
         self.sort = None
         self.url = get_url(subtype)
         self.filters = []
         self.options = {}
-        self.markets = []
+        self.markets = set()
         self.symbols = None
         self.market_columns = None
 
@@ -76,29 +83,38 @@ class Screener:
         # self.add_filter("type", "equal", subtype)
         self.add_option("lang", "en")
 
-    def add_filter(self, filter_, operation: FilterOperation = None, values=None):
+    def _add_filter_in_range(self, filter_, values):
+        filter_val = {"left": filter_, "operation": FilterOperation.IN_RANGE.value, "right": values}
+        self.filters.append(filter_val)
 
-        # if values is a list then the operation is 'in_range'
+    def _add_filter_equal(self, filter_, values):
+        filter_val = {"left": filter_, "operation": FilterOperation.EQUAL.value, "right": values}
+        self.filters.append(filter_val)
+
+    def add_filter(self, filter_, operation: FilterOperation = None, values=None):
         if isinstance(values, list):
-            filter_val = {"left": filter_, "operation": FilterOperation.IN_RANGE.value, "right": values}
+            self._add_filter_in_range(filter_, values)
         elif isinstance(values, bool):
-            filter_val = {"left": filter_, "operation": FilterOperation.EQUAL.value, "right": values}
+            self._add_filter_equal(filter_, values)
         else:
             filter_val = {"left": filter_, "operation": operation.value, "right": values}
-        self.filters.append(filter_val)
+            self.filters.append(filter_val)
 
     def add_option(self, key, value):
         self.options[key] = value
 
-    def set_markets(self, *market):
+    def set_markets(self, *markets):
         """
         Set the markets to be scanned
-        :param market: list of markets
+        :param markets: list of markets
         :return: None
         """
-        self.markets.extend(market)
+        for market in markets:
+            if market not in tvdata.stock['markets']:
+                raise ValueError(f"Unknown market: {market}")
+            self.markets.add(market)
 
-    def set_range(self, from_range=0, to_range=150):
+    def set_range(self, from_range: int = default_min_range, to_range: int = default_max_range) -> None:
         self.range = [from_range, to_range]
 
     # def set_symbols(self, symbols):
@@ -108,11 +124,14 @@ class Screener:
         self.sort = {"sortBy": sort_by, "sortOrder": order}
 
     def _build_payload(self):
-        payload = {"filter": self.filters if self.filters else [], "options": self.options,
-                   "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
-                   "markets": self.markets if self.markets else self.default_market, "sort": self.sort,
-                   "range": self.range}
-
+        payload = {
+            "filter": self.filters if self.filters else [],
+            "options": self.options,
+            "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
+            "markets": self.markets if self.markets else default_market, "sort": self.sort,
+            "range": self.range,
+            "columns": clean_columns(self.columns)
+        }
         return payload
 
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
@@ -121,9 +140,8 @@ class Screener:
         self.columns.append(time_interval.value)
 
         payload = self._build_payload()
-        payload["columns"] = clean_columns(self.columns)
+        payload_json = json.dumps(payload, indent=4)
 
-        payload_json = json.dumps(payload)
         if print_request:
             print(f"Request: {self.url}")
             print("Payload:")
@@ -143,7 +161,7 @@ class StockScreener(Screener):
     def __init__(self):
         super().__init__("global")
         self.columns.extend(tvdata.stock['columns'].keys())
-        self.sort_by("market_cap_basic", "desc")
+        self.sort_by(default_sort_stocks, "desc")
 
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
         df = super().get(time_interval, print_request)
@@ -168,5 +186,3 @@ class CryptoScreener(Screener):
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
         df = super().get(time_interval, print_request)
         return df.rename(columns=tvdata.crypto['columns'])
-
-
