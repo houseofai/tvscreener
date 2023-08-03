@@ -13,23 +13,28 @@ default_max_range = 150
 default_sort_stocks = "market_cap_basic"
 
 
-def find_ratings(value):
-    for rating in Ratings:
-        if rating.min <= value <= rating.max:
-            return rating
-
-
 class Ratings(Enum):
     STRONG_BUY = 0.5, 1, "Strong Buy"
     BUY = 0.1, 0.5, "Buy"
     NEUTRAL = -0.1, 0.1, "Neutral"
     SELL = -0.5, -0.1, "Sell"
     STRONG_SELL = -1, -0.5, "Strong Sell"
+    UNKNOWN = math.nan, math.nan, "Unknown"
 
     def __init__(self, min_, max_, label):
         self.min = min_
         self.max = max_
         self.label = label
+
+    def __contains__(self, item):
+        return self.min <= item <= self.max
+
+
+def find_ratings(value: float) -> Ratings:
+    for rating in Ratings:
+        if value in rating:
+            return rating
+    return Ratings.UNKNOWN
 
 
 class TimeInterval(Enum):
@@ -88,19 +93,17 @@ def get_url(subtype):
 
 class Screener:
 
-    def __init__(self, subtype):
+    def __init__(self):
         self.sort = None
-        self.url = get_url(subtype)
+        self.url = None
         self.filters = []
         self.options = {}
-        self.markets = set()
+        # self.markets = set()
         self.symbols = None
-        self.market_columns = None
 
         self.range = None
-
-        self.columns = list(tvdata.main['columns'].keys())
         self.set_range()
+        self.columns = tvdata.main['columns']
         # self.add_filter("type", "equal", subtype)
         self.add_option("lang", "en")
 
@@ -124,6 +127,88 @@ class Screener:
     def add_option(self, key, value):
         self.options[key] = value
 
+    def set_range(self, from_range: int = default_min_range, to_range: int = default_max_range) -> None:
+        self.range = [from_range, to_range]
+
+    # def set_symbols(self, symbols):
+    #    self.symbols = symbols
+
+    def sort_by(self, sort_by, order="desc"):
+        self.sort = {"sortBy": sort_by, "sortOrder": order}
+
+    def _build_payload(self, requested_columns_):
+        payload = {
+            "filter": self.filters,
+            "options": self.options,
+            "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
+            "sort": self.sort,
+            "range": self.range,
+            "columns": requested_columns_
+        }
+        return payload
+
+    def _build_columns(self):
+        requested_columns = list(self.columns.keys())
+        # requested_columns = clean_columns(requested_columns)
+        return requested_columns
+
+    def _build_dataframe(self, response, requested_columns, beautify=True):
+        # Parse response
+        data = [[d["s"]] + d["d"] for d in response.json()['data']]
+
+        # Build labels for the dataframe
+        requested_column_labels = ['Symbol'] + [self.columns[k]['label'] if k in self.columns else k for k in
+                                                requested_columns]
+
+        # Build dataframe
+        df = pd.DataFrame(data, columns=requested_column_labels)  # payload["columns"])
+
+        if beautify:
+            df = Beautify(df, self.columns).df
+        return df
+
+    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
+
+        requested_columns = self._build_columns()
+        # requested_columns = clean_columns(requested_columns)
+
+        # Time Interval
+        requested_columns.append(time_interval.value)
+
+        payload = self._build_payload(requested_columns)
+        payload_json = json.dumps(payload, indent=4)
+
+        if print_request:
+            print(f"Request: {self.url}")
+            print("Payload:")
+            print(json.dumps(payload, indent=4))
+
+        res = requests.post(self.url, data=payload_json)
+        if res.status_code == 200:
+            return self._build_dataframe(res, requested_columns, beautify)
+        else:
+            print(f"Error: {res.status_code}")
+            print(res.text)
+            return None
+
+
+class StockScreener(Screener):
+
+    def __init__(self):
+        super().__init__()
+        # self.subtype_columns = tvdata.stock['columns']
+        # self.columns.extend(self.subtype_columns.keys())
+        self.markets = set()
+
+        self.url = get_url("global")
+        self.columns = {**self.columns, **tvdata.stock['columns']}
+        self.sort_by(default_sort_stocks, "desc")
+
+    def _build_payload(self, requested_columns_):
+        payload = super()._build_payload(requested_columns_)
+        payload["markets"] = list(self.markets) if self.markets else default_market
+        return payload
+
     def set_markets(self, *markets):
         """
         Set the markets to be scanned
@@ -135,89 +220,19 @@ class Screener:
                 raise ValueError(f"Unknown market: {market}")
             self.markets.add(market)
 
-    def set_range(self, from_range: int = default_min_range, to_range: int = default_max_range) -> None:
-        self.range = [from_range, to_range]
-
-    # def set_symbols(self, symbols):
-    #    self.symbols = symbols
-
-    def sort_by(self, sort_by, order="desc"):
-        self.sort = {"sortBy": sort_by, "sortOrder": order}
-
-    def _build_payload(self):
-        payload = {
-            "filter": self.filters if self.filters else [],
-            "options": self.options,
-            "symbols": self.symbols if self.symbols else {"query": {"types": []}, "tickers": []},
-            "markets": list(self.markets) if self.markets else default_market,
-            "sort": self.sort,
-            "range": self.range,
-            "columns": clean_columns(self.columns)
-        }
-        return payload
-
-    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
-
-        # Time Interval
-        self.columns.append(time_interval.value)
-
-        payload = self._build_payload()
-        payload_json = json.dumps(payload, indent=4)
-
-        if print_request:
-            print(f"Request: {self.url}")
-            print("Payload:")
-            print(json.dumps(payload, indent=4))
-
-        res = requests.post(self.url, data=payload_json)
-        if res.status_code == 200:
-            r = [d["d"] for d in res.json()['data']]
-            df = pd.DataFrame(r, columns=payload["columns"])
-            if beautify:
-                df = Beautify(df).df
-            return df
-        else:
-            print(f"Error: {res.status_code}")
-            print(res.text)
-            return None
-
-
-class StockScreener(Screener):
-    def __init__(self):
-        super().__init__("global")
-        self.columns.extend(tvdata.stock['columns'].keys())
-        self.sort_by(default_sort_stocks, "desc")
-
-    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
-        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
-        return df.rename(columns=tvdata.stock['columns'])
-
 
 class ForexScreener(Screener):
     def __init__(self):
-        super().__init__("forex")
-        self.columns.extend(tvdata.forex['columns'].keys())
-
-    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
-        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
-        return df.rename(columns=tvdata.forex['columns'])
+        super().__init__()
+        self.url = get_url("forex")
+        self.columns = {**self.columns, **tvdata.forex['columns']}
 
 
 class CryptoScreener(Screener):
     def __init__(self):
-        super().__init__("crypto")
-        self.columns.extend(tvdata.crypto['columns'].keys())
-
-    def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
-        df = super().get(time_interval=time_interval, beautify=beautify, print_request=print_request)
-        return df.rename(columns=tvdata.crypto['columns'])
-
-
-def get_number_group(number):
-    for group in NumberGroup:
-        if number in group:
-            return group
-    return None
+        super().__init__()
+        self.url = get_url("crypto")
+        self.columns = {**self.columns, **tvdata.crypto['columns']}
 
 
 millnames = ['', '', 'M', 'B', '']
@@ -231,42 +246,51 @@ def millify(n):
     return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 
-class NumberGroup(Enum):
-    MILLION = 10e6, 10e9, "M",
-    BILLION = 10e9, 10e12, "B",
-
-    def __init__(self, min_, max_, label):
-        self.min = min_
-        self.max = max_
-        self.label = label
-
-    def __contains__(self, item):
-        return self.min <= item < self.max
-
-
 class Beautify:
-    mappings = {
-        'Recommend.All': 'Technical Rating raw',
-        'Recommend.MA': 'Moving Averages Rating raw',
-        'Recommend.Other': 'Oscillators Rating raw',
-        'dividends_paid': 'Dividends Paid (FY) raw',
-    }
-
-    def __init__(self, df):
+    def __init__(self, df, columns):
         self.df = df
-        self._rating('Recommend.All')
-        self._rating('Recommend.MA')
-        self._rating('Recommend.Other')
-        self._replace_nan('dividends_paid')
-        self._number_group('dividends_paid')
+        columns = {v.get('label'): v.get('format') for k, v in columns.items()}
+
+        for column in self.df.columns:
+            if column in columns:
+                format_ = columns.get(column)
+                if format_ is not None:
+                    self._copy_column(column)
+                    # fn = self.fn_mappings.get(format_)
+                    self._format_column(format_, column)
+
+    def _format_column(self, format_, column):
+        if format_ is 'bool':
+            self._to_bool(column)
+        elif format_ is 'rating':
+            self._rating(column)
+        elif format_ is 'percent':
+            self._percent(column)
+        elif format_ is 'number_group':
+            self._replace_nan(column)
+            self._number_group(column)
+        else:
+            print(f"Unknown format: {format_} for column: {column}")
 
     def _rating(self, column):
-        self.df[self.mappings[column]] = self.df[column]
         self.df[column] = self.df[column].apply(lambda x: find_ratings(x).label)
 
     def _number_group(self, column):
-        self.df[self.mappings[column]] = self.df[column]
         self.df[column] = self.df[column].apply(lambda x: millify(x))
+
+    def _percent(self, column):
+        self.df[column] = self.df[column].apply(lambda x: f"{x:.2f}%")
+
+    def _copy_column(self, column):
+        raw_name = self._get_raw_name(column)
+        self.df[raw_name] = self.df[column]
+
+    def _get_raw_name(self, column):
+        return column + " raw"
 
     def _replace_nan(self, column):
         self.df[column] = self.df[column].fillna(0)
+
+    def _to_bool(self, column):
+        self.df[column] = self.df[column].apply(lambda x: True if x is 'true' else False)
+        self.df[column] = self.df[column].astype(bool)
