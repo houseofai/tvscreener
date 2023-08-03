@@ -6,11 +6,11 @@ Python library to retrieve data from TradingView Screener.
 
 # Features
 - Query Stock, Forex and Crypto Screener
-- Query all the fields available
-- Query any time interval
+- All the fields available (~250 fields)
+- Any time interval (no need to be a registered user)
 - Filters by any fields, symbols, markets, countries, etc.
 - Get the results as a Pandas Dataframe
-- 
+
 ![dataframe.png](images%2Fdataframe.png)
 
 
@@ -117,3 +117,9 @@ Print the request URL and the payload:
 ss = tvs.StockScreener()
 df = ss.get(print_request=True)
 ```
+
+# TODO
+- [ ] Crypto Coins screener
+- [ ] ETF screener
+- [ ] More Built-in filters
+- [ ] Query historical data
