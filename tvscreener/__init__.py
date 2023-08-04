@@ -1,12 +1,12 @@
 import json
-import math
 from enum import Enum
 
 import pandas as pd
 import requests
 
-from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label
+from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label, find_ratings
 from tvscreener.filter import FilterOperator, Filter, Ratings
+from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_raw_name
 
 default_market = ["america"]
 default_min_range = 0
@@ -14,30 +14,6 @@ default_max_range = 150
 default_sort_stocks = "market_cap_basic"
 default_sort_crypto = "24h_vol|5"
 default_sort_forex = "name"
-
-
-def find_ratings(value: float) -> Ratings:
-    for rating in Ratings:
-        if value is not None and value in rating:
-            return rating
-    return Ratings.UNKNOWN
-
-
-def get_url(subtype):
-    return f"https://scanner.tradingview.com/{subtype}/scan"
-
-
-def get_columns(fields_: Field, time_interval: TimeInterval):
-    columns = {field.get_field_name(time_interval): field.label for field in fields_}
-    rec_columns = {field.get_rec_field(time_interval): field.get_rec_label() for field in fields_ if
-                   field.recommendation}
-    if time_interval is not TimeInterval.ONE_DAY:
-        columns[time_interval.update_mode()] = "Update Mode"
-    return {**columns, **rec_columns}
-
-
-def is_status_code_ok(response):
-    return response.status_code == 200
 
 
 class Screener:
@@ -171,21 +147,6 @@ class CryptoScreener(Screener):
         self.specific_fields = fields.CryptoField
         self.sort_by(default_sort_crypto, "desc")
         self.add_misc("price_conversion", {"to_symbol": False})
-
-
-millnames = ['', '', 'M', 'B', '']
-
-
-def millify(n):
-    n = float(n)
-    millidx = max(0, min(len(millnames) - 1,
-                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
-
-    return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
-
-
-def get_raw_name(column):
-    return column + " raw"
 
 
 class Beautify:

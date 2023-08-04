@@ -22,6 +22,13 @@ class Ratings(Enum):
         return [self.min, self.max]
 
 
+def find_ratings(value: float) -> Ratings:
+    for rating in Ratings:
+        if value is not None and value in rating:
+            return rating
+    return Ratings.UNKNOWN
+
+
 class FilterOperator(Enum):
     BELOW = "less"
     BELOW_OR_EQUAL = "eless"
