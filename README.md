@@ -85,8 +85,10 @@ ss.set_markets('america', 'france', 'japan')
 df = ss.get()
 ```
 You can list the markets with:
+
 ```python
-from tvscreener import tvdata
+
+from ignore import tvdata
 
 print(tvdata.stock['markets'])
 # ['america', 'uk', 'india', 'spain', 'russia', 'australia', ...]
@@ -103,12 +105,14 @@ df = ss.get()
 ```
 `Recommend.All` corresponds to the `TECHNICAL RATING` column.
 You can get a list of all columns available with:
-```python
-from tvscreener import tvdata
 
-print(tvdata.stock['columns'].keys()) # ['ChaikinMoneyFlow', 'MoneyFlow', 'Value.Traded', 'after_tax_margin', ...]
-print(tvdata.forex['columns'].keys()) # ['ask', 'bid', 'country', 'sector', ...]
-print(tvdata.crypto['columns'].keys()) # ['24h_vol_change|5', '24h_vol|5', 'ask', 'average_volume_10d_calc', ...]
+```python
+
+from ignore import tvdata
+
+print(tvdata.stock['columns'].keys())  # ['ChaikinMoneyFlow', 'MoneyFlow', 'Value.Traded', 'after_tax_margin', ...]
+print(tvdata.forex['columns'].keys())  # ['ask', 'bid', 'country', 'sector', ...]
+print(tvdata.crypto['columns'].keys())  # ['24h_vol_change|5', '24h_vol|5', 'ask', 'average_volume_10d_calc', ...]
 ```
 
 

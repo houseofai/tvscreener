@@ -1,12 +1,11 @@
-import math
-
-from tvscreener import tvdata
 import json
+import math
 from enum import Enum
 
 import pandas as pd
 import requests
 
+from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label
 from tvscreener.filter import FilterOperator, Filter, Ratings
 
 default_market = ["america"]
@@ -19,28 +18,26 @@ default_sort_forex = "name"
 
 def find_ratings(value: float) -> Ratings:
     for rating in Ratings:
-        if value in rating:
+        if value is not None and value in rating:
             return rating
     return Ratings.UNKNOWN
 
 
-class TimeInterval(Enum):
-    ONE_MINUTE = "1"
-    FIVE_MINUTES = "5"
-    FIFTEEN_MINUTES = "15"
-    THIRTY_MINUTES = "30"
-    SIXTY_MINUTES = "60"
-    TWO_HOURS = "120"
-    FOUR_HOURS = "240"
-    ONE_DAY = "1D"
-    ONE_WEEK = "1W"
-
-    def update_mode(self):
-        return f"update_mode|{self.value}"
-
-
 def get_url(subtype):
     return f"https://scanner.tradingview.com/{subtype}/scan"
+
+
+def get_columns(fields_: Field, time_interval: TimeInterval):
+    columns = {field.get_field_name(time_interval): field.label for field in fields_}
+    rec_columns = {field.get_rec_field(time_interval): field.get_rec_label() for field in fields_ if
+                   field.recommendation}
+    if time_interval is not TimeInterval.ONE_DAY:
+        columns[time_interval.update_mode()] = "Update Mode"
+    return {**columns, **rec_columns}
+
+
+def is_status_code_ok(response):
+    return response.status_code == 200
 
 
 class Screener:
@@ -52,10 +49,10 @@ class Screener:
         self.options = {}
         self.symbols = None
         self.misc = {}
+        self.specific_fields = None
 
         self.range = None
         self.set_range()
-        self.columns = tvdata.main['columns']
         self.add_option("lang", "en")
 
     def add_prebuilt_filter(self, filter_: Filter):
@@ -89,53 +86,23 @@ class Screener:
         }
         return payload
 
-    def _build_columns(self):
-        requested_columns = list(self.columns.keys())
-        # requested_columns = clean_columns(requested_columns)
-        return requested_columns
-
-    def _build_dataframe(self, response, requested_columns, time_interval: TimeInterval, beautify=True):
+    def _build_dataframe(self, response, columns, beautify=True):
         # Parse response
         data = [[d["s"]] + d["d"] for d in response.json()['data']]
 
-        # Build labels for the dataframe
-        requested_column_labels = ['Symbol'] + [self.columns[k]['label'] if k in self.columns else k for k in
-                                                requested_columns]
-
-        # Default is one day, so there is no need to format the columns
-        if time_interval is not TimeInterval.ONE_DAY:
-            requested_column_labels.append('Time Interval')
-
         # Build dataframe
-        df = pd.DataFrame(data, columns=requested_column_labels)  # payload["columns"])
+        df = pd.DataFrame(data, columns=['Symbol'] + list(columns.values()))
 
         if beautify:
-            df = Beautify(df, self.columns).df
+            df = Beautify(df, self.specific_fields).df
         return df
-
-    def _add_time_interval_to_columns(self, time_interval: TimeInterval, columns: list):
-        # Default is one day, so there is no need to format the columns
-        if time_interval is TimeInterval.ONE_DAY:
-            return columns
-
-        new_columns = []
-        for column in columns:
-            v = self.columns[column]
-            if "interval" in v and v["interval"]:
-                new_columns.append(f"{column}|{time_interval.value}")
-            else:
-                new_columns.append(column)
-        new_columns.append(time_interval.update_mode())
-        return new_columns
 
     def get(self, time_interval=TimeInterval.ONE_DAY, beautify=True, print_request=False):
 
-        initial_columns = list(self.columns.keys())  # self._build_columns()
-
         # Time Interval
-        timeframed_columns = self._add_time_interval_to_columns(time_interval, initial_columns)
+        columns = get_columns(self.specific_fields, time_interval)
 
-        payload = self._build_payload(timeframed_columns)
+        payload = self._build_payload(list(columns.keys()))
         payload_json = json.dumps(payload, indent=4)
 
         if print_request:
@@ -143,12 +110,12 @@ class Screener:
             print("Payload:")
             print(json.dumps(payload, indent=4))
 
-        res = requests.post(self.url, data=payload_json)
-        if res.status_code == 200:
-            return self._build_dataframe(res, initial_columns, time_interval, beautify)
+        response = requests.post(self.url, data=payload_json)
+        if is_status_code_ok(response):
+            return self._build_dataframe(response, columns, beautify)
         else:
-            print(f"Error: {res.status_code}")
-            print(res.text)
+            print(f"Error: {response.status_code}")
+            print(response.text)
             return None
 
 
@@ -156,15 +123,17 @@ class StockScreener(Screener):
 
     def __init__(self):
         super().__init__()
-        self.markets = set()
+        subtype = "stock"
+        self.markets = set(default_market)
 
         self.url = get_url("global")
-        self.columns = {**self.columns, **tvdata.stock['columns']}
+        self.specific_fields = fields.StockField  # {**self.columns, **tvdata.stock['columns']}
         self.sort_by(default_sort_stocks, "desc")
 
     def _build_payload(self, requested_columns_):
         payload = super()._build_payload(requested_columns_)
-        payload["markets"] = list(self.markets) if self.markets else default_market
+        if self.markets:
+            payload["markets"] = list(self.markets)
         return payload
 
     def set_markets(self, *markets):
@@ -173,8 +142,10 @@ class StockScreener(Screener):
         :param markets: list of markets
         :return: None
         """
+        self.markets = set()
+        market_labels = [market.value for market in StocksMarket]
         for market in markets:
-            if market not in tvdata.stock['markets']:
+            if market not in market_labels:
                 raise ValueError(f"Unknown market: {market}")
             self.markets.add(market)
 
@@ -182,20 +153,22 @@ class StockScreener(Screener):
 class ForexScreener(Screener):
     def __init__(self):
         super().__init__()
-        self.url = get_url("forex")
-        self.columns = {**self.columns, **tvdata.forex['columns']}
+        subtype = "forex"
+        self.url = get_url(subtype)
+        self.markets = set(subtype)
+        self.specific_fields = fields.ForexField  # {**self.fields, **tvdata.forex['columns']}
         # self.add_filter("sector", FilterOperation.IN_RANGE, ['Major', 'Minor'])
         self.sort_by(default_sort_forex, "asc")
         self.add_misc("symbols", {"query": {"types": ["forex"]}})
-        self.add_misc("markets", ["forex"])
 
 
 class CryptoScreener(Screener):
     def __init__(self):
         super().__init__()
-        self.markets = set("crypto")
-        self.url = get_url("crypto")
-        self.columns = {**self.columns, **tvdata.crypto['columns']}
+        subtype = "crypto"
+        self.markets = set(subtype)
+        self.url = get_url(subtype)
+        self.specific_fields = fields.CryptoField
         self.sort_by(default_sort_crypto, "desc")
         self.add_misc("price_conversion", {"to_symbol": False})
 
@@ -211,18 +184,21 @@ def millify(n):
     return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 
+def get_raw_name(column):
+    return column + " raw"
+
+
 class Beautify:
-    def __init__(self, df, columns):
+    def __init__(self, df, specific_fields: Enum):
         self.df = df
-        columns = {v.get('label'): v.get('format') for k, v in columns.items()}
 
         for column in self.df.columns:
-            if column in columns:
-                format_ = columns.get(column)
-                if format_ is not None:
-                    self._copy_column(column)
-                    # fn = self.fn_mappings.get(format_)
-                    self._format_column(format_, column)
+            # Find the enum with the column name
+            specific_field = get_by_label(specific_fields, column)
+            if specific_field is not None and specific_field.format is not None:
+                self._copy_column(column)
+                # fn = self.fn_mappings.get(format_)
+                self._format_column(specific_field.format, column)
 
     def _format_column(self, format_, column):
         if format_ is 'bool':
@@ -247,11 +223,8 @@ class Beautify:
         self.df[column] = self.df[column].apply(lambda x: f"{x:.2f}%")
 
     def _copy_column(self, column):
-        raw_name = self._get_raw_name(column)
+        raw_name = get_raw_name(column)
         self.df[raw_name] = self.df[column]
-
-    def _get_raw_name(self, column):
-        return column + " raw"
 
     def _replace_nan(self, column):
         self.df[column] = self.df[column].fillna(0)
