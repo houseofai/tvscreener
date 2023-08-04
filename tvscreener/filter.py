@@ -2,7 +2,7 @@ import math
 from enum import Enum
 
 
-class Ratings(Enum):
+class Rating(Enum):
     STRONG_BUY = 0.5, 1, "Strong Buy"
     BUY = 0.1, 0.5, "Buy"
     NEUTRAL = -0.1, 0.1, "Neutral"
@@ -21,12 +21,21 @@ class Ratings(Enum):
     def range(self):
         return [self.min, self.max]
 
+    @classmethod
+    def find(cls, value: float):
+        if value is not None:
+            for rating in Rating:
+                if value in rating:
+                    return rating
+        return Rating.UNKNOWN
 
-def find_ratings(value: float) -> Ratings:
-    for rating in Ratings:
-        if value is not None and value in rating:
-            return rating
-    return Ratings.UNKNOWN
+    @classmethod
+    def names(cls):
+        return list(map(lambda c: c.name, cls))
+
+    @classmethod
+    def values(cls):
+        return list(map(lambda c: c.value, cls))
 
 
 class FilterOperator(Enum):
@@ -75,5 +84,5 @@ class TypeFilter(Filter):
 
 
 class RatingFilter(Filter):
-    def __init__(self, field: str, rating: Ratings):
+    def __init__(self, field: str, rating: Rating):
         super().__init__(field, FilterOperator.IN_RANGE, rating.range())

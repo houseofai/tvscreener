@@ -31,5 +31,3 @@ def millify(n):
     return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 
-def get_raw_name(column):
-    return column + " raw"

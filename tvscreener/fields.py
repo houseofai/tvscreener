@@ -1,13 +1,6 @@
 from enum import Enum
 
 
-def get_by_label(specific_fields, label):
-    for specific_field in specific_fields:
-        if specific_field.label == label:
-            return specific_field
-    return None
-
-
 class TimeInterval(Enum):
     ONE_MINUTE = "1"
     FIVE_MINUTES = "5"
@@ -48,6 +41,13 @@ class Field(Enum):
     def get_rec_label(self):
         if self.recommendation:
             return f"Reco. {self.label}"
+        return None
+
+    @classmethod
+    def get_by_label(cls, specific_fields, label):
+        for specific_field in specific_fields:
+            if specific_field.label == label:
+                return specific_field
         return None
 
 
@@ -691,3 +691,11 @@ class StocksMarket(Enum):
     VENEZUELA = "venezuela"
     CYPRUS = "cyprus"
     BANGLADESH = "bangladesh"
+
+    @classmethod
+    def names(cls):
+        return list(map(lambda c: c.name, cls))
+
+    @classmethod
+    def values(cls):
+        return list(map(lambda c: c.value, cls))

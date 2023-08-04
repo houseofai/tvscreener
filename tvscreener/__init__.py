@@ -1,12 +1,11 @@
 import json
-from enum import Enum
 
 import pandas as pd
 import requests
 
-from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label
-from tvscreener.filter import FilterOperator, Filter, Ratings
-from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_raw_name
+from tvscreener.fields import Field, StocksMarket, TimeInterval
+from tvscreener.filter import FilterOperator, Filter, Rating
+from tvscreener.util import get_columns, is_status_code_ok, get_url, millify
 
 default_market = ["america"]
 default_min_range = 0
@@ -150,12 +149,12 @@ class CryptoScreener(Screener):
 
 
 class Beautify:
-    def __init__(self, df, specific_fields: Enum):
+    def __init__(self, df, specific_fields: Field):
         self.df = df
 
         for column in self.df.columns:
             # Find the enum with the column name
-            specific_field = get_by_label(specific_fields, column)
+            specific_field = specific_fields.get_by_label(specific_fields, column)
             if specific_field is not None and specific_field.format is not None:
                 self._copy_column(column)
                 # fn = self.fn_mappings.get(format_)
@@ -175,7 +174,7 @@ class Beautify:
             print(f"Unknown format: {format_} for column: {column}")
 
     def _rating(self, column):
-        self.df[column] = self.df[column].apply(lambda x: find_ratings(x).label)
+        self.df[column] = self.df[column].apply(lambda x: Rating.find(x).label)
 
     def _number_group(self, column):
         self.df[column] = self.df[column].apply(lambda x: millify(x))
@@ -184,7 +183,7 @@ class Beautify:
         self.df[column] = self.df[column].apply(lambda x: f"{x:.2f}%")
 
     def _copy_column(self, column):
-        raw_name = get_raw_name(column)
+        raw_name = column + " raw"
         self.df[raw_name] = self.df[column]
 
     def _replace_nan(self, column):
