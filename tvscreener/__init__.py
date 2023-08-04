@@ -4,7 +4,7 @@ from enum import Enum
 import pandas as pd
 import requests
 
-from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label, find_ratings
+from tvscreener.fields import Field, StocksMarket, TimeInterval, get_by_label
 from tvscreener.filter import FilterOperator, Filter, Ratings
 from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_raw_name
 
