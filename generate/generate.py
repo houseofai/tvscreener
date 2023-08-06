@@ -55,7 +55,24 @@ computed_reco_fields = ['ADX',
                         'Stoch.RSI.K',
                         'total_shares_outstanding_fundamental',
                         'Value.Traded',
-                        'W.R']
+                        'W.R'
+                        ]
+
+historical_fields = ["ADX+DI",
+                     "ADX-DI",
+                     "AO",
+                     "AO",  # Second time
+                     "CCI20",
+                     "Mom",
+                     "RSI7",
+                     "RSI",
+                     "Stoch.K",
+                     "Stoch.D",
+                     ]
+
+
+def is_historical_field(field_name):
+    return field_name in historical_fields
 
 
 def is_recommendation(field_value):
@@ -165,12 +182,12 @@ def get_columns(url_):
 
         field_value = row_value.text
         format_ = get_format(technical_label, field_value)
-        recommendation = format_ is not None and 'recommendation' in format_
+        historical = is_historical_field(technical_label)
 
         if format_ is None:
-            print(f"{technical_label} - |{field_value}| - {format_} - {recommendation}")
+            print(f"{technical_label} - |{field_value}| - {format_} - {historical}")
         fields_attribute[technical_label] = {**fields_attribute[technical_label], "format": format_,
-                                             "recommendation": recommendation}
+                                             "historical": historical}
 
     driver.quit()
     return fields_attribute
@@ -206,7 +223,7 @@ def generate(dict_):
         label = v.get('label')
         format_ = f'{v.get("format", None)}' if v.get('format', None) else None
         interval = v.get('interval', False)
-        recommendation = v.get('recommendation', False)
+        historical = v.get('historical', False)
         enum_field = format_field(label)
 
         new_dict[enum_field] = {
@@ -214,7 +231,7 @@ def generate(dict_):
             'field_name': field_name,
             'format': format_,
             'interval': interval,
-            'recommendation': recommendation
+            'historical': historical
         }
     return new_dict
 

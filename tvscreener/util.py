@@ -16,6 +16,8 @@ def get_columns(fields_: Field, time_interval: TimeInterval):
 
 
 def _format_timed_fields(field_):
+    """Format fields that embed the time interval in the name
+    e.g. 'change.1W' -> 'change|1W'"""
     # Split the field by '.'
     if '.' in field_:
         num = field_.split('.')[1]
@@ -25,6 +27,11 @@ def _format_timed_fields(field_):
         elif num in ['1W', '1M']:
             return field_.replace('.', '|')
     return field_
+
+
+def _get_computed_recommendation_field(field):
+    if field.format == 'computed_recommendation':
+        return field.get_rec_field()
 
 
 def is_status_code_ok(response):
