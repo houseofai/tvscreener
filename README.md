@@ -88,7 +88,7 @@ You can list the markets with:
 
 ```python
 
-from ignore import tvdata
+from generate import tvdata
 
 print(tvdata.stock['markets'])
 # ['america', 'uk', 'india', 'spain', 'russia', 'australia', ...]

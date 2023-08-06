@@ -1,2 +1,6 @@
 pandas
-requests>=2.27.1
+requests
+jinja2
+selenium
+tqdm
+setuptools
