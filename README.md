@@ -2,22 +2,32 @@
 
 Python library to retrieve data from TradingView Screener.
 
-![tradingview-screener.png](images%2Ftradingview-screener.png)
+![tradingview-screener.png](.github%2Fimg%2Ftradingview-screener.png)
 
-# Features
+# Main Features
 - Query Stock, Forex and Crypto Screener
 - All the fields available (~250 fields)
 - Any time interval (no need to be a registered user)
 - Filters by any fields, symbols, markets, countries, etc.
 - Get the results as a Pandas Dataframe
 
-![dataframe.png](images%2Fdataframe.png)
-
+![dataframe.png](.github%2Fimg%2Fdataframe.png)
 
 ## Installation
+The source code is currently hosted on GitHub at:
+https://github.com/houseofai/tvscreener
+
+Binary installers for the latest released version are available at the [Python
+Package Index (PyPI)](https://pypi.org/project/tvscreener)
+```sh
+# or PyPI
+pip install tvscreener
+```
+From pip + GitHub:
 ```sh
 $ pip install git+https://github.com/houseofai/tradingview-screener@main
 ```
+
 ## Usage
 
 For Stocks screener:
