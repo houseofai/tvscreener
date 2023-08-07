@@ -18,6 +18,18 @@ default_sort_crypto = "24h_vol|5"
 default_sort_forex = "name"
 
 
+def _build_dataframe(response, columns, with_tech_fields=False):
+    # Parse response
+    data = [[d["s"]] + d["d"] for d in response.json()['data']]
+
+    # Build dataframe
+    df = pd.DataFrame(data, columns=['Symbol'] + list(columns.values()))
+
+    if with_tech_fields:
+        df.columns = pd.MultiIndex.from_tuples([('Symbol', '')] + list(columns.items()))
+    return df
+
+
 class Screener:
 
     def __init__(self):
@@ -64,16 +76,10 @@ class Screener:
         }
         return payload
 
-    def _build_dataframe(self, response, columns):
-        # Parse response
-        data = [[d["s"]] + d["d"] for d in response.json()['data']]
-
-        # Build dataframe
-        df = pd.DataFrame(data, columns=['Symbol'] + list(columns.values()))
-
-        return df
-
-    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+    def get(self, time_interval=TimeInterval.ONE_DAY,
+            with_tech_fields=False,
+            print_request=False
+            ):
 
         # Time Interval
         columns = get_columns(self.specific_fields, time_interval)
@@ -88,7 +94,7 @@ class Screener:
 
         response = requests.post(self.url, data=payload_json)
         if is_status_code_ok(response):
-            return self._build_dataframe(response, columns)
+            return _build_dataframe(response, columns, with_tech_fields)
         else:
             print(f"Error: {response.status_code}")
             print(response.text)
@@ -175,7 +181,7 @@ class Beautify:
             self._round(column)
         elif specific_field.format is 'percent':
             self._percent(column)
-        elif specific_field.format is 'recommendation':
+        elif specific_field.has_recommendation():
             self._recommendation(column, specific_field)
         elif specific_field.format is 'computed_recommendation':
             # TODO
@@ -204,14 +210,9 @@ class Beautify:
     def _rating(self, column):
         self.df[column] = self.df[column].apply(lambda x: Rating.find(x).label)
 
-    def _test(self, x):
-        return f"{x:.2f}%"
-
     def _recommendation(self, column, specific_field):
         self.df[column] = self.df.apply(
-            lambda x: f"{x[column]} - {get_recommendation(x[specific_field.get_rec_label()])}" if x[
-                                                                                                      specific_field.get_rec_label()] is not None else None,
-            axis=1)
+            lambda x: f"{x[column]} - {get_recommendation(x[specific_field.get_rec_label()])}", axis=1)
 
     def _number_group(self, column):
         self.df[column] = self.df[column].apply(lambda x: millify(x))

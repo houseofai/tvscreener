@@ -15,32 +15,42 @@ class TimeInterval(Enum):
     def update_mode(self):
         return f"update_mode|{self.value}"
 
-    def format_field(self, field):
-        return f"{field}|{self.value}"
+
+def add_time_interval(field_name, time_interval):
+    return f"{field_name}|{time_interval.value}"
+
+
+def add_historical(field_name, historical=1):
+    return f"{field_name}[{historical}]"
+
+
+def add_historical_to_label(field_name, historical=1):
+    return f"Prev. {field_name}"
+
+
+def add_rec(field_name):
+    return f"Rec.{field_name}"
+
+
+def add_rec_to_label(label):
+    return f"Reco. {label}"
 
 
 class Field(Enum):
 
-    def __init__(self, label, field_name, format_=None, interval=False, recommendation=False):
+    def __init__(self, label, field_name, format_=None, interval=False, historical=False):
         self.label = label
         self.field_name = field_name
         self.format = format_
         self.interval = interval
-        self.recommendation = recommendation
+        self.historical = historical
 
-    def get_field_name(self, timeinterval=TimeInterval.ONE_DAY):
-        if self.interval and timeinterval != TimeInterval.ONE_DAY:
-            return timeinterval.format_field(self.field_name)
-        return self.field_name
-
-    def get_rec_field(self, timeinterval=TimeInterval.ONE_DAY):
-        if self.recommendation:
-            return f"Rec.{self.get_field_name(timeinterval)}"
-        return None
+    def has_recommendation(self):
+        return self.format == 'recommendation'
 
     def get_rec_label(self):
-        if self.recommendation:
-            return f"Reco. {self.label}"
+        if self.has_recommendation():
+            return add_rec_to_label(self.label)
         return None
 
     @classmethod

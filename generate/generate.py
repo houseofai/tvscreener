@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from selenium import webdriver
 import re
@@ -22,7 +23,7 @@ from tvscreener.field import Field
 
 
 class {{ name }}Field(Field):{% for key, v in enum_values.items() %}
-    {{ key }} = '{{ v.label }}', '{{ v.field_name }}', '{{ v.format }}', {{ v.interval }}, {{ v.recommendation }}{% endfor %}
+    {{ key }} = '{{ v.label }}', '{{ v.field_name }}', '{{ v.format }}', {{ v.interval }}, {{ v.historical }}{% endfor %}
 """
 
 computed_reco_fields = ['ADX',
@@ -116,7 +117,7 @@ def get_format(technical_label, field_value):
     return field_type_
 
 
-def get_columns(url_):
+def scrap_columns(url_):
     # proxy = Proxy()
     # proxy.setHttpProxy("https://scanner.tradingview.com/:8080")
     driver = webdriver.Firefox()  # proxy=proxy)
@@ -209,13 +210,19 @@ def format_field(field: str):
     field = remove(field, ['(', ')', ',', '/', '-'])
     field = field.strip()
     # Replace
-    field = field.replace(' ', '_').replace('-', '_').replace('*', 'x').replace('&', 'and').replace('%',
-                                                                                                    'percent').replace(
-        '1m', '1min').replace('5m', '5min')
+    field = (field.replace(' ', '_')
+             .replace('-', '_')
+             .replace('*', 'x')
+             .replace('&', 'and')
+             .replace('%', 'percent')
+             .replace('1m', '1min')
+             .replace('5m', '5min')
+             .replace('.', '_')
+             )
     return field.upper()
 
 
-def generate(dict_):
+def format_fields(dict_):
     # Sort dictionary by keys lower case
     dict_ = {k: dict_[k] for k in sorted(dict_, key=lambda s: format_field(dict_[s]['label'].lower()))}
     new_dict = {}
@@ -236,19 +243,70 @@ def generate(dict_):
     return new_dict
 
 
-def generate_template(url, name, original_stock_columns):
-    selenium_columns = get_columns(url)
-    for k, v in selenium_columns.items():
-        if k in original_stock_columns.keys() and 'interval' in original_stock_columns[k].keys():
-            selenium_columns[k] = {**v, 'interval:': original_stock_columns[k]['interval']}
+def set_intervals(columns):
+    columns_w_interval = load_intervals()
+    for col in columns_w_interval:
+        if col in columns:
+            columns[col]['interval'] = True
         else:
-            selenium_columns[k] = {**v, 'interval:': False}
+            print(f'Column {col} not found in the interval columns')
+    return columns
 
-    formatted_columns = generate(selenium_columns)
+
+def fill_template(name, columns):
     # Render the template
     template_code = jinja2.Template(template)
     template_code.globals['now'] = datetime.datetime.utcnow
-    return template_code.render(name=name, enum_values=formatted_columns)
+    return template_code.render(name=name, enum_values=columns)
+
+
+def load_intervals():
+    with open('time_intervals.json') as f:
+        return json.load(f)['columns']
+
+
+def load_patterns():
+    with open('patterns.json') as f:
+        return json.load(f)['patterns']
+
+
+def load_main():
+    with open('main.json') as f:
+        return json.load(f)['main']
+
+
+def add_patterns_columns(columns):
+    patterns = load_patterns()
+    for pattern in patterns:
+        columns[pattern] = {
+            'label': pattern,
+            'field_name': pattern,
+            'format': 'bool',
+            'interval': False,
+            'historical': False
+        }
+    return columns
+
+
+def add_main_columns(columns):
+    main_columns = load_main()
+    for col in main_columns:
+        columns[col] = {
+            'label': col,
+            'field_name': col,
+            'format': 'text',
+            'interval': False,
+            'historical': False
+        }
+    return columns
+
+
+def generate_columns(selenium_columns):
+    selenium_columns = add_main_columns(selenium_columns)
+    selenium_columns = add_patterns_columns(selenium_columns)
+    selenium_columns = set_intervals(selenium_columns)
+    selenium_columns = format_fields(selenium_columns)
+    return selenium_columns
 
 
 def write(filename, generated_template):
