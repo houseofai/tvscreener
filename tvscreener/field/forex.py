@@ -1,7 +1,7 @@
 
 # ----------------------
 # Generated file
-# 2023-08-07 13:27:16.819378
+# 2023-08-08 09:09:31.680369
 # ----------------------
 from tvscreener.field import Field
 
@@ -67,7 +67,8 @@ class ForexField(Field):
     CHANGE_FROM_OPEN_PERCENT = 'Change from Open %', 'change_from_open', 'percent', True, False
     CHANGE_PERCENT = 'Change %', 'change', 'percent', True, False
     COMMODITY_CHANNEL_INDEX_20 = 'Commodity Channel Index (20)', 'CCI20', 'computed_recommendation', True, True
-    DESCRIPTION = 'description', 'description', 'text', False, False
+    CURRENCY = 'Currency', 'currency', 'text', False, False
+    DESCRIPTION = 'Description', 'description', 'text', False, False
     DONCHIAN_CHANNELS_LOWER_BAND_20 = 'Donchian Channels Lower Band (20)', 'DonchCh20.Lower', 'float', True, False
     DONCHIAN_CHANNELS_UPPER_BAND_20 = 'Donchian Channels Upper Band (20)', 'DonchCh20.Upper', 'float', True, False
     EXPONENTIAL_MOVING_AVERAGE_10 = 'Exponential Moving Average (10)', 'EMA10', 'computed_recommendation', True, False
@@ -77,6 +78,7 @@ class ForexField(Field):
     EXPONENTIAL_MOVING_AVERAGE_30 = 'Exponential Moving Average (30)', 'EMA30', 'computed_recommendation', True, False
     EXPONENTIAL_MOVING_AVERAGE_5 = 'Exponential Moving Average (5)', 'EMA5', 'computed_recommendation', True, False
     EXPONENTIAL_MOVING_AVERAGE_50 = 'Exponential Moving Average (50)', 'EMA50', 'computed_recommendation', True, False
+    FUNDAMENTAL_CURRENCY_CODE = 'Fundamental Currency Code', 'fundamental_currency_code', 'text', False, False
     GAP_PERCENT = 'Gap %', 'gap', 'percent', True, False
     GROUP = 'Group', 'sector', 'text', False, False
     HIGH = 'High', 'high', 'float', True, False
@@ -87,7 +89,7 @@ class ForexField(Field):
     ICHIMOKU_LEADING_SPAN_B_9_26_52_26 = 'Ichimoku Leading Span B (9, 26, 52, 26)', 'Ichimoku.Lead2', 'float', True, False
     KELTNER_CHANNELS_LOWER_BAND_20 = 'Keltner Channels Lower Band (20)', 'KltChnl.lower', 'float', True, False
     KELTNER_CHANNELS_UPPER_BAND_20 = 'Keltner Channels Upper Band (20)', 'KltChnl.upper', 'float', True, False
-    LOGOID = 'logoid', 'logoid', 'text', False, False
+    LOGOID = 'Logoid', 'logoid', 'text', False, False
     LOW = 'Low', 'low', 'float', True, False
     MACD_LEVEL_12_26 = 'MACD Level (12, 26)', 'MACD.macd', 'computed_recommendation', True, False
     MACD_SIGNAL_12_26 = 'MACD Signal (12, 26)', 'MACD.signal', 'float', True, False
@@ -102,7 +104,7 @@ class ForexField(Field):
     MONTH_PERFORMANCE_3 = '3-Month Performance', 'Perf.3M', 'percent', False, False
     MONTH_PERFORMANCE_6 = '6-Month Performance', 'Perf.6M', 'percent', False, False
     MOVING_AVERAGES_RATING = 'Moving Averages Rating', 'Recommend.MA', 'text', True, False
-    NAME = 'name', 'name', 'text', False, False
+    NAME = 'Name', 'name', 'text', False, False
     NEGATIVE_DIRECTIONAL_INDICATOR_14 = 'Negative Directional Indicator (14)', 'ADX-DI', 'round', True, True
     OPEN = 'Open', 'open', 'float', True, False
     OSCILLATORS_RATING = 'Oscillators Rating', 'Recommend.Other', 'text', True, False
@@ -156,9 +158,9 @@ class ForexField(Field):
     STOCHASTIC_PERCENTK_14_3_3 = 'Stochastic %K (14, 3, 3)', 'Stoch.K', 'computed_recommendation', True, True
     STOCHASTIC_RSI_FAST_3_3_14_14 = 'Stochastic RSI Fast (3, 3, 14, 14)', 'Stoch.RSI.K', 'computed_recommendation', True, False
     STOCHASTIC_RSI_SLOW_3_3_14_14 = 'Stochastic RSI Slow (3, 3, 14, 14)', 'Stoch.RSI.D', 'round', True, False
-    SUBTYPE = 'subtype', 'subtype', 'text', False, False
+    SUBTYPE = 'Subtype', 'subtype', 'text', False, False
     TECHNICAL_RATING = 'Technical Rating', 'Recommend.All', 'rating', True, False
-    TYPE = 'type', 'type', 'text', False, False
+    TYPE = 'Type', 'type', 'text', False, False
     ULTIMATE_OSCILLATOR_7_14_28 = 'Ultimate Oscillator (7, 14, 28)', 'UO', 'recommendation', True, False
     VOLATILITY = 'Volatility', 'Volatility.D', 'percent', False, False
     VOLATILITY_MONTH = 'Volatility Month', 'Volatility.M', 'percent', False, False

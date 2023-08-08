@@ -1,7 +1,7 @@
 
 # ----------------------
 # Generated file
-# 2023-08-07 13:27:14.474948
+# 2023-08-08 09:09:30.634904
 # ----------------------
 from tvscreener.field import Field
 
@@ -77,9 +77,10 @@ class StockField(Field):
     CHANGE_PERCENT = 'Change %', 'change', 'percent', True, False
     COMMODITY_CHANNEL_INDEX_20 = 'Commodity Channel Index (20)', 'CCI20', 'computed_recommendation', True, True
     COUNTRY = 'Country', 'country', 'text', False, False
+    CURRENCY = 'Currency', 'currency', 'text', False, False
     CURRENT_RATIO_MRQ = 'Current Ratio (MRQ)', 'current_ratio', 'round', False, False
     DEBT_TO_EQUITY_RATIO_MRQ = 'Debt to Equity Ratio (MRQ)', 'debt_to_equity', 'round', False, False
-    DESCRIPTION = 'description', 'description', 'text', False, False
+    DESCRIPTION = 'Description', 'description', 'text', False, False
     DIVIDENDS_PAID_FY = 'Dividends Paid (FY)', 'dividends_paid', 'currency', False, False
     DIVIDENDS_PER_SHARE_ANNUAL_YOY_GROWTH = 'Dividends per share (Annual YoY Growth)', 'dps_common_stock_prim_issue_yoy_growth_fy', 'percent', False, False
     DIVIDENDS_PER_SHARE_FY = 'Dividends per Share (FY)', 'dps_common_stock_prim_issue_fy', 'currency', False, False
@@ -116,6 +117,7 @@ class StockField(Field):
     FREE_CASH_FLOW_QUARTERLY_QOQ_GROWTH = 'Free Cash Flow (Quarterly QoQ Growth)', 'free_cash_flow_qoq_growth_fq', 'percent', False, False
     FREE_CASH_FLOW_QUARTERLY_YOY_GROWTH = 'Free Cash Flow (Quarterly YoY Growth)', 'free_cash_flow_yoy_growth_fq', 'percent', False, False
     FREE_CASH_FLOW_TTM_YOY_GROWTH = 'Free Cash Flow (TTM YoY Growth)', 'free_cash_flow_yoy_growth_ttm', 'percent', False, False
+    FUNDAMENTAL_CURRENCY_CODE = 'Fundamental Currency Code', 'fundamental_currency_code', 'text', False, False
     GAP_PERCENT = 'Gap %', 'gap', 'percent', True, False
     GOODWILL = 'Goodwill', 'goodwill', 'currency', False, False
     GROSS_MARGIN_FY = 'Gross Margin (FY)', 'gross_profit_margin_fy', 'percent', False, False
@@ -136,7 +138,7 @@ class StockField(Field):
     KELTNER_CHANNELS_LOWER_BAND_20 = 'Keltner Channels Lower Band (20)', 'KltChnl.lower', 'float', True, False
     KELTNER_CHANNELS_UPPER_BAND_20 = 'Keltner Channels Upper Band (20)', 'KltChnl.upper', 'float', True, False
     LAST_YEAR_REVENUE_FY = 'Last Year Revenue (FY)', 'last_annual_revenue', 'currency', False, False
-    LOGOID = 'logoid', 'logoid', 'text', False, False
+    LOGOID = 'Logoid', 'logoid', 'text', False, False
     LOW = 'Low', 'low', 'currency', True, False
     MACD_LEVEL_12_26 = 'MACD Level (12, 26)', 'MACD.macd', 'computed_recommendation', True, False
     MACD_SIGNAL_12_26 = 'MACD Signal (12, 26)', 'MACD.signal', 'float', True, False
@@ -153,7 +155,7 @@ class StockField(Field):
     MONTH_PERFORMANCE_3 = '3-Month Performance', 'Perf.3M', 'percent', False, False
     MONTH_PERFORMANCE_6 = '6-Month Performance', 'Perf.6M', 'percent', False, False
     MOVING_AVERAGES_RATING = 'Moving Averages Rating', 'Recommend.MA', 'rating', True, False
-    NAME = 'name', 'name', 'text', False, False
+    NAME = 'Name', 'name', 'text', False, False
     NEGATIVE_DIRECTIONAL_INDICATOR_14 = 'Negative Directional Indicator (14)', 'ADX-DI', 'round', True, True
     NET_DEBT_MRQ = 'Net Debt (MRQ)', 'net_debt', 'currency', False, False
     NET_INCOME_ANNUAL_YOY_GROWTH = 'Net Income (Annual YoY Growth)', 'net_income_yoy_growth_fy', 'percent', False, False
@@ -261,7 +263,7 @@ class StockField(Field):
     STOCHASTIC_RSI_FAST_3_3_14_14 = 'Stochastic RSI Fast (3, 3, 14, 14)', 'Stoch.RSI.K', 'computed_recommendation', True, False
     STOCHASTIC_RSI_SLOW_3_3_14_14 = 'Stochastic RSI Slow (3, 3, 14, 14)', 'Stoch.RSI.D', 'round', True, False
     SUBMARKET = 'Submarket', 'submarket', 'missing', False, False
-    SUBTYPE = 'subtype', 'subtype', 'text', False, False
+    SUBTYPE = 'Subtype', 'subtype', 'text', False, False
     TECHNICAL_RATING = 'Technical Rating', 'Recommend.All', 'rating', True, False
     TOTAL_ASSETS_ANNUAL_YOY_GROWTH = 'Total Assets (Annual YoY Growth)', 'total_assets_yoy_growth_fy', 'percent', False, False
     TOTAL_ASSETS_MRQ = 'Total Assets (MRQ)', 'total_assets', 'currency', False, False
@@ -276,7 +278,7 @@ class StockField(Field):
     TOTAL_LIABILITIES_MRQ = 'Total Liabilities (MRQ)', 'total_liabilities_fq', 'currency', False, False
     TOTAL_REVENUE_FY = 'Total Revenue (FY)', 'total_revenue', 'currency', False, False
     TOTAL_SHARES_OUTSTANDING = 'Total Shares Outstanding', 'total_shares_outstanding_fundamental', 'number_group', False, False
-    TYPE = 'type', 'type', 'text', False, False
+    TYPE = 'Type', 'type', 'text', False, False
     ULTIMATE_OSCILLATOR_7_14_28 = 'Ultimate Oscillator (7, 14, 28)', 'UO', 'recommendation', True, False
     UPCOMING_EARNINGS_DATE = 'Upcoming Earnings Date', 'earnings_release_next_date', 'date', False, False
     VOLATILITY = 'Volatility', 'Volatility.D', 'percent', False, False
