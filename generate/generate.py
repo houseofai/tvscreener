@@ -291,8 +291,10 @@ def add_patterns_columns(columns):
 def add_main_columns(columns):
     main_columns = load_main()
     for col in main_columns:
+        # Label: Upper case the first letter of each word
+        label = ' '.join([word[0].upper() + word[1:] for word in col.split('_')])
         columns[col] = {
-            'label': col,
+            'label': label,
             'field_name': col,
             'format': 'text',
             'interval': False,
