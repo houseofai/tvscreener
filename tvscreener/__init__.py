@@ -1,16 +1,15 @@
 import json
-from enum import Enum
 
 import pandas as pd
 import requests
-from typing import List
 
 from tvscreener.field import TimeInterval, Field
 from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type
-from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_recommendation
+from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_recommendation, \
+    MalformedRequestException
 
 default_market = ["america"]
 default_min_range = 0
@@ -20,10 +19,19 @@ default_sort_crypto = "24h_vol|5"
 default_sort_forex = "name"
 
 
-def _build_dataframe(response, columns, with_tech_fields=False):
-    # Parse response
-    data = [[d["s"]] + d["d"] for d in response.json()['data']]
+class ScreenerDataFrame(pd.DataFrame):
+    def __init__(self, data, columns: dict, *args, **kwargs):
+        self.original_columns = columns
+        super().__init__(data, columns=list(columns.values()), *args, **kwargs)
 
+    def set_technical_columns(self, only=False):
+        if only:
+            self.columns = self.original_columns.keys()
+        else:
+            self.columns = pd.MultiIndex.from_tuples(self.original_columns.items())
+
+
+def _build_dataframe(data, columns, with_tech_fields=False):
     # Build dataframe
     df = pd.DataFrame(data, columns=['Symbol'] + list(columns.values()))
 
@@ -31,7 +39,8 @@ def _build_dataframe(response, columns, with_tech_fields=False):
         df.columns = pd.MultiIndex.from_tuples([('Symbol', '')] + list(columns.items()))
 
     # Order columns by setting symbol, name, description first
-    df = df[['Symbol', 'Name', 'Description'] + [c for c in df.columns if c not in ['Symbol', 'Description', 'Name']]]
+    df = df[
+        ['Symbol', 'Name', 'Description'] + [c for c in df.columns if c not in ['Symbol', 'Description', 'Name']]]
     return df
 
 
@@ -64,10 +73,8 @@ class Screener:
         for filter_ in self.filters:
             if filter_.filter_type == filter_type:
                 return filter_
-        return None
 
     def add_filter(self, filter_: Filter):
-
         # filter_val = {"left": filter_, "operation": operation.value, "right": values}
         # Case where the filter already exists, and we want to add more values
         existing_filter = self._get_filter(filter_.filter_type)
@@ -106,36 +113,32 @@ class Screener:
         }
         return payload
 
-    def get(self, time_interval=TimeInterval.ONE_DAY,
-            with_tech_fields=False,
-            print_request=False
-            ):
+    def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
 
-        # Time Interval
+        # Build columns
         columns = get_columns(self.specific_fields, time_interval)
 
         payload = self._build_payload(list(columns.keys()))
-        payload_json = json.dumps(payload, indent=4)
+        payload = json.dumps(payload, indent=4)
 
         if print_request:
             print(f"Request: {self.url}")
             print("Payload:")
-            print(json.dumps(payload, indent=4))
+            print(payload)
 
-        response = requests.post(self.url, data=payload_json)
+        response = requests.post(self.url, data=payload)
         if is_status_code_ok(response):
-            return _build_dataframe(response, columns, with_tech_fields)
+            data = [[d["s"]] + d["d"] for d in response.json()['data']]
+            return ScreenerDataFrame(data, columns)
         else:
-            print(f"Error: {response.status_code}")
-            print(response.text)
-            return None
+            raise MalformedRequestException(response.status_code, response.text, self.url, payload)
 
 
 class StockScreener(Screener):
 
     def __init__(self):
         super().__init__()
-        subtype = "stock"
+        # subtype = "stock"
         self.markets = set(default_market)
 
         self.url = get_url("global")
@@ -235,83 +238,3 @@ class CryptoScreener(Screener):
         self.specific_fields = CryptoField
         self.sort_by(default_sort_crypto, "desc")
         self.add_misc("price_conversion", {"to_symbol": False})
-
-
-def beautify(df, specific_fields):
-    df = Beautify(df, specific_fields).df
-    return df
-
-
-class Beautify:
-    def __init__(self, df, specific_fields: Field):
-        self.df = df.copy()
-
-        for column in self.df.columns:
-            # Find the enum with the column name
-            specific_field = specific_fields.get_by_label(specific_fields, column)
-            if specific_field is not None and specific_field.format is not None:
-                # self._copy_column(column)
-                # fn = self.fn_mappings.get(format_)
-                self._format_column(specific_field, column)
-
-    def _format_column(self, specific_field, column):
-        if specific_field.format is 'bool':
-            self._to_bool(column)
-        elif specific_field.format is 'rating':
-            self._rating(column)
-        elif specific_field.format is 'round':
-            self._round(column)
-        elif specific_field.format is 'percent':
-            self._percent(column)
-        elif specific_field.has_recommendation():
-            self._recommendation(column, specific_field)
-        elif specific_field.format is 'computed_recommendation':
-            # TODO
-            pass
-        elif specific_field.format is 'text':
-            # TODO
-            pass
-        elif specific_field.format is 'date':
-            # TODO
-            pass
-        elif specific_field.format is 'missing':
-            # TODO
-            pass
-        elif specific_field.format is 'currency':
-            # TODO
-            pass
-        elif specific_field.format is 'float':
-            # TODO
-            pass
-        elif specific_field.format is 'number_group':
-            self._replace_nan(column)
-            self._number_group(column)
-        else:
-            print(f"Unknown format: {specific_field.format} for column: {column}")
-
-    def _rating(self, column):
-        self.df[column] = self.df[column].apply(lambda x: Rating.find(x).label)
-
-    def _recommendation(self, column, specific_field):
-        self.df[column] = self.df.apply(
-            lambda x: f"{x[column]} - {get_recommendation(x[specific_field.get_rec_label()])}", axis=1)
-
-    def _number_group(self, column):
-        self.df[column] = self.df[column].apply(lambda x: millify(x))
-
-    def _percent(self, column):
-        self.df[column] = self.df[column].apply(lambda x: f"{x:.2f}%" if x is not None else None)
-
-    def _round(self, column):
-        self.df[column] = self.df[column].apply(lambda x: round(x, 2) if x is not None else None)
-
-    def _copy_column(self, column):
-        raw_name = column + " raw"
-        self.df[raw_name] = self.df[column]
-
-    def _replace_nan(self, column):
-        self.df[column] = self.df[column].fillna(0)
-
-    def _to_bool(self, column):
-        self.df[column] = self.df[column].apply(lambda x: True if x is 'true' else False)
-        self.df[column] = self.df[column].astype(bool)
