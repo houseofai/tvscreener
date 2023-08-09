@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country
+from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country, Exchange
 
 
 class TestScreener(unittest.TestCase):
@@ -120,3 +120,12 @@ class TestScreener(unittest.TestCase):
 
         self.assertEqual("NASDAQ:ACGL", df.loc[0, "Symbol"])
         self.assertEqual("ACGL", df.loc[0, "Name"])
+
+    def test_exchange(self):
+        ss = StockScreener()
+        ss.set_exchanges(Exchange.NYSE_ARCA)
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "AMEX:LNG")
+        self.assertEqual(df.loc[0, "Name"], "LNG")

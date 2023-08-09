@@ -171,7 +171,7 @@ class SubMarket(Enum):
 
 class Exchange(Enum):
     OTC = "OTC"
-    AMEX = "AMEX"
+    NYSE_ARCA = "AMEX"
     NASDAQ = "NASDAQ"
     NYSE = "NYSE"
 
