@@ -119,7 +119,6 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(106, len(df))
 
         # WARNING: Order is not guaranteed
-
         #self.assertEqual("NASDAQ:ACGL", df.loc[0, "Symbol"])
         #self.assertEqual("ACGL", df.loc[0, "Name"])
 

@@ -5,12 +5,12 @@ from tvscreener import StockScreener, CryptoScreener, ForexScreener, TimeInterva
 
 class TestScreener(unittest.TestCase):
 
-    def test_cryptoscreener(self):
+    def test_range(self):
         ss = CryptoScreener()
         df = ss.get()
-        self.assertTrue(len(df) == 150)
+        self.assertEqual(150, len(df))
 
-    def test_cryptoscreener_4H(self):
+    def test_timeinterval(self):
         ss = CryptoScreener()
         df = ss.get(time_interval=TimeInterval.FOUR_HOURS)
-        self.assertTrue(len(df) == 150)
+        self.assertEqual(150, len(df))
