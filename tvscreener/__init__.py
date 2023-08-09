@@ -9,7 +9,7 @@ from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type, SubMarket, \
-    Country, Exchange
+    Country, Exchange, Region
 from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
 
@@ -274,6 +274,15 @@ class ForexScreener(Screener):
         # self.add_filter("sector", FilterOperation.IN_RANGE, ['Major', 'Minor'])
         self.sort_by(default_sort_forex, "asc")
         self.add_misc("symbols", {"query": {"types": ["forex"]}})
+
+    def set_regions(self, *regions: Region):
+        """
+        Set the regions to be scanned
+        :param regions: list of regions
+        :return: None
+        """
+        for region in regions:
+            self.add_filter(Filter(FilterType.REGION, FilterOperator.EQUAL, region.value))
 
 
 class CryptoScreener(Screener):

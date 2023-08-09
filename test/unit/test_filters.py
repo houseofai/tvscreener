@@ -1,7 +1,8 @@
 import unittest
 
-from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket, StocksMarket
-from tvscreener.filter import Country, Exchange, Rating
+from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket, StocksMarket, \
+    ForexScreener
+from tvscreener.filter import Country, Exchange, Rating, Region
 
 
 class TestFilters(unittest.TestCase):
@@ -239,3 +240,12 @@ class TestFilters(unittest.TestCase):
 
     def test_rating_values(self):
         self.assertIn(Rating.STRONG_BUY.value, Rating.values())
+
+    def test_region(self):
+        ss = ForexScreener()
+        ss.set_regions(Region.AFRICA)
+        self.assertEqual(len(ss.filters), 1)
+
+        region = ss._get_filter(FilterType.REGION)
+        self.assertEqual(1, len(region.values))
+        self.assertEqual(Region.AFRICA.value, region.values[0])
