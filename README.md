@@ -1,17 +1,27 @@
-# TradingView Screener API
+<div align="center">
+  <img alt="logo tradingview screener api library" src="https://raw.githubusercontent.com/houseofai/tvscreener/main/.github/img/logo-tradingview-screener-api.png"><br>
+</div>
 
-Python library to retrieve data from TradingView Screener.
+-----------------
+
+# TradingView Screener API: simple Python library to retrieve data from TradingView Screener
+
+[![PyPI version](https://badge.fury.io/py/tvscreener.svg)](https://badge.fury.io/py/tvscreener)
+[![Downloads](https://pepy.tech/badge/tvscreener)](https://pepy.tech/project/tvscreener)
 
 ![tradingview-screener.png](https://raw.githubusercontent.com/houseofai/tvscreener/main/.github/img/tradingview-screener.png)
 
+Get the results as a Pandas Dataframe
+
+![dataframe.png](https://github.com/houseofai/tvscreener/blob/main/.github/img/dataframe.png?raw=true)
+
 # Main Features
-- Query Stock, Forex and Crypto Screener
-- All the fields available (~250 fields)
-- Any time interval (no need to be a registered user)
+- Query **Stock**, **Forex** and **Crypto** Screener
+- All the **fields available**: ~300 fields - even hidden ones)
+- **Any time interval** (`no need to be a registered user` - 1D, 5m, 1h, etc.)
 - Filters by any fields, symbols, markets, countries, etc.
 - Get the results as a Pandas Dataframe
 
-![dataframe.png](https://github.com/houseofai/tvscreener/blob/main/.github/img/dataframe.png?raw=true)
 
 ## Installation
 The source code is currently hosted on GitHub at:
@@ -54,100 +64,6 @@ cs = tvs.CryptoScreener()
 df = cs.get()
 ```
 
-## Options
+## Parameters
 
-### Range
-By default, it gets the 150 first results. You can change this by setting the `range` option:
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-ss.set_range(0, 10000)
-df = ss.get()
-
-# or to get the last 500 rows:
-ss.set_range(9500, 10000)
-df = ss.get()
-```
-
-### Sorting
-While it is easier to sort on the Pandas Dataframe, you can also sort directly on the screener:
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-ss.sort_by('market_cap_basic', 'desc')
-df = ss.get()
-```
-Note that `market_cap_basic` is the default sorting option for stocks
-
-## Filters
-
-### Markets
-Filter by markets:
-
-Default: `america`
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-ss.set_markets('america', 'france', 'japan')
-df = ss.get()
-```
-You can list the markets with:
-
-```python
-
-from generate import tvdata
-
-print(tvdata.stock['markets'])
-# ['america', 'uk', 'india', 'spain', 'russia', 'australia', ...]
-```
-
-### By Columns
-Filter by columns:
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-ss.add_filter('Recommend.All', tvs.filter.FilterOperator.IN_RANGE, values=[0.5, 1]) # Strong BUY
-df = ss.get()
-```
-`Recommend.All` corresponds to the `TECHNICAL RATING` column.
-You can get a list of all columns available with:
-
-```python
-
-from ignore import tvdata
-
-print(tvdata.stock['columns'].keys())  # ['ChaikinMoneyFlow', 'MoneyFlow', 'Value.Traded', 'after_tax_margin', ...]
-print(tvdata.forex['columns'].keys())  # ['ask', 'bid', 'country', 'sector', ...]
-print(tvdata.crypto['columns'].keys())  # ['24h_vol_change|5', '24h_vol|5', 'ask', 'average_volume_10d_calc', ...]
-```
-
-
-## Time intervals
-Change the time interval of the technical data:
-
-Default: Daily (`TimeInterval.DAILY`)
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-df = ss.get(tvs.TimeInterval.THIRTY_MINUTES)
-```
-
-## Debugging
-Print the request URL and the payload:
-```python
-import tvscreener as tvs
-
-ss = tvs.StockScreener()
-df = ss.get(print_request=True)
-```
-
-# TODO
-- [ ] Crypto Coins screener
-- [ ] ETF screener
-- [ ] More Built-in filters
-- [ ] Query historical data
+For Options and Filters, please check the [notebooks](https://raw.githubusercontent.com/houseofai/tvscreener/main/notebooks/)
