@@ -11,6 +11,7 @@ jobs:
         python-version: '3.x'
     - name: Generate coverage report
       run: |
+        pip install -r requirements.txt
         pip install pytest
         pip install pytest-cov
         pytest --cov=./ --cov-report=xml

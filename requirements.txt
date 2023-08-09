@@ -4,3 +4,5 @@ jinja2
 selenium
 tqdm
 setuptools
+pytest
+pytest-cov
