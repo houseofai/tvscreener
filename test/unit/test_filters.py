@@ -5,11 +5,20 @@ from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperat
 from tvscreener.filter import Country, Exchange, Rating, Region
 
 
-class TestFilters(unittest.TestCase):
+class TestStockFilters(unittest.TestCase):
+    def test_set_markets(self):
+        ss = StockScreener()
+        ss.set_markets(StocksMarket.JAPAN, StocksMarket.FRANCE)
+        self.assertEqual({StocksMarket.JAPAN, StocksMarket.FRANCE}, ss.markets)
+
+    def test_set_markets_unique(self):
+        ss = StockScreener()
+        ss.set_markets(StocksMarket.JAPAN)
+        self.assertEqual({StocksMarket.JAPAN}, ss.markets)
 
     def test_stock_additional_subtypes(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.COMMON_STOCK)
+        ss.set_symbol_types(SymbolType.COMMON_STOCK)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -24,7 +33,7 @@ class TestFilters(unittest.TestCase):
 
     def test_depository_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.DEPOSITORY_RECEIPT)
+        ss.set_symbol_types(SymbolType.DEPOSITORY_RECEIPT)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -37,7 +46,7 @@ class TestFilters(unittest.TestCase):
 
     def test_etf_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.ETF)
+        ss.set_symbol_types(SymbolType.ETF)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -50,7 +59,7 @@ class TestFilters(unittest.TestCase):
 
     def test_etn_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.ETN)
+        ss.set_symbol_types(SymbolType.ETN)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -63,7 +72,7 @@ class TestFilters(unittest.TestCase):
 
     def test_mutual_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.MUTUAL_FUND)
+        ss.set_symbol_types(SymbolType.MUTUAL_FUND)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -76,7 +85,7 @@ class TestFilters(unittest.TestCase):
 
     def test_preferred_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.PREFERRED_STOCK)
+        ss.set_symbol_types(SymbolType.PREFERRED_STOCK)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -89,7 +98,7 @@ class TestFilters(unittest.TestCase):
 
     def test_reit_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.REIT)
+        ss.set_symbol_types(SymbolType.REIT)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -102,11 +111,11 @@ class TestFilters(unittest.TestCase):
 
     def test_structured_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.STRUCTURED)
+        ss.set_symbol_types(SymbolType.STRUCTURED)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
-        self.assertEqual(subtypes.values,   SymbolType.STRUCTURED.value)
+        self.assertEqual(subtypes.values, SymbolType.STRUCTURED.value)
         self.assertEqual(subtypes.operation, FilterOperator.EQUAL)
 
         types = ss._get_filter(FilterType.TYPE)
@@ -115,7 +124,7 @@ class TestFilters(unittest.TestCase):
 
     def test_uit_subtype(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.UIT)
+        ss.set_symbol_types(SymbolType.UIT)
         self.assertEqual(len(ss.filters), 2)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
@@ -128,8 +137,8 @@ class TestFilters(unittest.TestCase):
 
     def test_duplicates(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.UIT)
-        ss.set_subtypes(SymbolType.UIT)
+        ss.set_symbol_types(SymbolType.UIT)
+        ss.set_symbol_types(SymbolType.UIT)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
         self.assertEqual(1, len(subtypes.values))
@@ -139,10 +148,10 @@ class TestFilters(unittest.TestCase):
 
     def test_double_duplicates(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.UIT)
-        ss.set_subtypes(SymbolType.STRUCTURED)
-        ss.set_subtypes(SymbolType.UIT)
-        ss.set_subtypes(SymbolType.STRUCTURED)
+        ss.set_symbol_types(SymbolType.UIT)
+        ss.set_symbol_types(SymbolType.STRUCTURED)
+        ss.set_symbol_types(SymbolType.UIT)
+        ss.set_symbol_types(SymbolType.STRUCTURED)
 
         subtypes = ss._get_filter(FilterType.SUBTYPE)
         self.assertEqual(2, len(subtypes.values))
@@ -241,6 +250,8 @@ class TestFilters(unittest.TestCase):
     def test_rating_values(self):
         self.assertIn(Rating.STRONG_BUY.value, Rating.values())
 
+
+class TestForexFilters(unittest.TestCase):
     def test_region(self):
         ss = ForexScreener()
         ss.set_regions(Region.AFRICA)
