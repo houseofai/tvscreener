@@ -1,4 +1,5 @@
 import math
+from typing import Type
 
 from tvscreener import Field, TimeInterval
 from tvscreener.field import add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
@@ -29,7 +30,7 @@ def format_historical_field(field_, time_interval, historical=1):
     return formatted_technical_field
 
 
-def get_columns(fields_: Field, time_interval: TimeInterval):
+def get_columns_to_request(fields_: Type[Field], time_interval: TimeInterval):
     """
     Assemble the technical columns for the request
     :param fields_: type of fields to be requested (StockField, ForexField, CryptoField)
@@ -46,7 +47,6 @@ def get_columns(fields_: Field, time_interval: TimeInterval):
 
     # Drop column that starts with "pattern"
     columns = {k: v for k, v in columns.items() if not k.startswith("candlestick")}
-    columns["symbol"] = "Symbol"
 
     # Add the time interval update mode column
     if time_interval is not TimeInterval.ONE_DAY:
@@ -66,12 +66,7 @@ def get_columns(fields_: Field, time_interval: TimeInterval):
     # Merge the dicts
     columns = {**columns, **rec_columns, **hist_columns}
 
-    # Set the order of the columns
-    first_columns = ['symbol', 'name', 'description']
-    ordered_columns = {k: v for k, v in columns.items() if k in first_columns}
-    ordered_columns.update({k: v for k, v in columns.items() if k not in first_columns})
-
-    return ordered_columns
+    return columns
 
 
 def _format_timed_fields(field_):

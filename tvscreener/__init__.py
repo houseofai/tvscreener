@@ -8,7 +8,7 @@ from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type
-from tvscreener.util import get_columns, is_status_code_ok, get_url, millify, get_recommendation, \
+from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
 
 default_market = ["america"]
@@ -21,27 +21,22 @@ default_sort_forex = "name"
 
 class ScreenerDataFrame(pd.DataFrame):
     def __init__(self, data, columns: dict, *args, **kwargs):
-        self.original_columns = columns
-        super().__init__(data, columns=list(columns.values()), *args, **kwargs)
+        # Add the extra received columns
+        columns = {"symbol": "Symbol", **columns}
+        super().__init__(data, columns=columns.values(), *args, **kwargs)
 
-    def set_technical_columns(self, only=False):
+        # Reorder columns
+        first_columns = ['symbol', 'name', 'description']
+        ordered_columns = {k: columns.get(k) for k in first_columns}
+        ordered_columns.update({k: v for k, v in columns.items() if k not in first_columns})
+        self.attrs['original_columns'] = ordered_columns
+        self._update_inplace(self[ordered_columns.values()])
+
+    def set_technical_columns(self, only: bool = False):
         if only:
-            self.columns = self.original_columns.keys()
+            self.columns = pd.Index(self.attrs['original_columns'].keys())
         else:
-            self.columns = pd.MultiIndex.from_tuples(self.original_columns.items())
-
-
-def _build_dataframe(data, columns, with_tech_fields=False):
-    # Build dataframe
-    df = pd.DataFrame(data, columns=['Symbol'] + list(columns.values()))
-
-    if with_tech_fields:
-        df.columns = pd.MultiIndex.from_tuples([('Symbol', '')] + list(columns.items()))
-
-    # Order columns by setting symbol, name, description first
-    df = df[
-        ['Symbol', 'Name', 'Description'] + [c for c in df.columns if c not in ['Symbol', 'Description', 'Name']]]
-    return df
+            self.columns = pd.MultiIndex.from_tuples(self.attrs['original_columns'].items())
 
 
 class Screener:
@@ -85,7 +80,7 @@ class Screener:
         elif not existing_filter:
             # Case where the filter does not exist
             # If the filter contains values array with only one value, we can use EQUAL instead of IN_RANGE
-            if len(filter_.values) == 1:
+            if len(filter_.values) == 1 and filter_.operation == FilterOperator.IN_RANGE:
                 filter_.operation = FilterOperator.EQUAL
             self.filters.append(filter_)
 
@@ -116,7 +111,7 @@ class Screener:
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
 
         # Build columns
-        columns = get_columns(self.specific_fields, time_interval)
+        columns = get_columns_to_request(self.specific_fields, time_interval)
 
         payload = self._build_payload(list(columns.keys()))
         payload = json.dumps(payload, indent=4)
