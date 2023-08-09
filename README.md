@@ -8,7 +8,7 @@
 
 [![PyPI version](https://badge.fury.io/py/tvscreener.svg)](https://badge.fury.io/py/tvscreener)
 [![Downloads](https://pepy.tech/badge/tvscreener)](https://pepy.tech/project/tvscreener)
-
+[![Coverage](https://codecov.io/github/houseofai/tvscreener/coverage.svg?branch=main)](https://codecov.io/gh/houseofai/tvscreener)
 ![tradingview-screener.png](https://raw.githubusercontent.com/houseofai/tvscreener/main/.github/img/tradingview-screener.png)
 
 Get the results as a Pandas Dataframe
