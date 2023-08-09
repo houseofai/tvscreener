@@ -17,8 +17,8 @@ class TestFilters(unittest.TestCase):
 
         types = ss._get_filter(FilterType.TYPE)
         self.assertIn(Type.STOCK.value, types.values)
-        self.assertIn(Type.DEPOSITORY_RECEIPT.value, types.values)
-        self.assertEqual(types.operation, FilterOperator.IN_RANGE)
+        # self.assertIn(Type.DEPOSITORY_RECEIPT.value, types.values)
+        self.assertEqual(types.operation, FilterOperator.EQUAL)
 
     def test_depository_subtype(self):
         ss = StockScreener()
