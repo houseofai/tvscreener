@@ -163,6 +163,15 @@ class Country(Enum):
     VIETNAM = "Vietnam"
 
 
+class Region(Enum):
+    AFRICA = "Africa",
+    AMERICAS = "Americas",
+    ASIA = "Asia",
+    EUROPE = "Europe",
+    MIDDLE_EAST = "Middle East",
+    PACIFIC = "Pacific"
+
+
 class SubMarket(Enum):
     OTCQB = "OTCQB"
     OTCQX = "OTCQX"
@@ -256,6 +265,7 @@ class FilterType(Enum):
     SUBTYPE = "subtype"
     SUBMARKET = "submarket"
     COUNTRY = "country"
+    REGION = "country"
 
 
 class Filter:
@@ -267,5 +277,3 @@ class Filter:
     def to_dict(self):
         right = self.values[0] if len(self.values) == 1 else self.values
         return {"left": self.filter_type.value, "operation": self.operation.value, "right": right}
-
-
