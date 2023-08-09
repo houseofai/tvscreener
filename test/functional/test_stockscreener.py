@@ -35,7 +35,7 @@ class TestScreener(unittest.TestCase):
 
     def test_search(self):
         ss = StockScreener()
-        ss.set_subtypes(SymbolType.COMMON_STOCK)
+        ss.set_symbol_types(SymbolType.COMMON_STOCK)
         ss.search('AA')
         df = ss.get()
         self.assertEqual(102, len(df))
