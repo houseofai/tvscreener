@@ -1,5 +1,5 @@
 import json
-from typing import List
+from enum import Enum
 
 import pandas as pd
 import requests
@@ -64,7 +64,7 @@ class Screener:
     #    self.filters.append(filter_val)
 
     def search(self, value: str):
-        self.add_filter(Filter(FilterType.SEARCH, FilterOperator.MATCH, value))
+        self.add_filter(FilterType.SEARCH, FilterOperator.MATCH, value)
 
     def _get_filter(self, filter_type: FilterType) -> Filter:
         for filter_ in self.filters:
@@ -89,7 +89,8 @@ class Screener:
             filter_.operation = FilterOperator.EQUAL
         self.filters.append(filter_)
 
-    def add_filter(self, filter_: Filter):
+    def add_filter(self, filter_type: FilterType, operation: FilterOperator, *values: Enum or str):
+        filter_ = Filter(filter_type, operation, values)
         # filter_val = {"left": filter_, "operation": operation.value, "right": values}
         # Case where the filter already exists, and we want to add more values
         existing_filter = self._get_filter(filter_.filter_type)
@@ -160,7 +161,16 @@ class StockScreener(Screener):
             payload["markets"] = list(self.markets)
         return payload
 
-    def set_subtypes(self, *symbol_types: SymbolType):
+    def _add_types(self, *types: Type):
+        if len(types) > 1:
+            operator = FilterOperator.IN_RANGE
+        else:
+            operator = FilterOperator.EQUAL
+
+        for type_ in types:
+            self.add_filter(FilterType.TYPE, operator, type_.value)
+
+    def set_symbol_types(self, *symbol_types: SymbolType):
         """
         Set the subtypes to be scanned
         :param symbol_types: list of subtypes
@@ -201,29 +211,15 @@ class StockScreener(Screener):
             symbol_types.append(SymbolType.DEPOSITORY_RECEIPT)
 
         for symbol_type in symbol_types:
-            self.add_filter(Filter(FilterType.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy()))
+            self.add_filter(FilterType.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy())
 
-    def set_markets(self, *markets):
+    def set_markets(self, *markets: StocksMarket):
         """
         Set the markets to be scanned
         :param markets: list of markets
         :return: None
         """
-        self.markets = set()
-        market_labels = [market.value for market in StocksMarket]
-        for market in markets:
-            if market not in market_labels:
-                raise ValueError(f"Unknown market: {market}")
-            self.markets.add(market)
-
-    def set_submarkets(self, *submarkets: SubMarket):
-        """
-        Set the submarkets to be scanned
-        :param submarkets: list of submarkets
-        :return: None
-        """
-        for submarket in submarkets:
-            self.add_filter(Filter(FilterType.SUBMARKET, FilterOperator.EQUAL, submarket.value))
+        self.markets = set(markets)
 
     def set_primary_listing(self, primary: bool = True):
         """
@@ -232,18 +228,18 @@ class StockScreener(Screener):
         :return: None
         """
         if primary:
-            self.add_filter(Filter(FilterType.PRIMARY, FilterOperator.EQUAL, True))
+            self.add_filter(FilterType.PRIMARY, FilterOperator.EQUAL, True)
         else:
             self.remove_filter(FilterType.PRIMARY)
 
-    def _add_types(self, *types: Type):
-        if len(types) > 1:
-            operator = FilterOperator.IN_RANGE
-        else:
-            operator = FilterOperator.EQUAL
-
-        for type_ in types:
-            self.add_filter(Filter(FilterType.TYPE, operator, type_.value))
+    def set_submarkets(self, *submarkets: SubMarket):
+        """
+        Set the submarkets to be scanned
+        :param submarkets: list of submarkets
+        :return: None
+        """
+        for submarket in submarkets:
+            self.add_filter(FilterType.SUBMARKET, FilterOperator.EQUAL, submarket.value)
 
     def set_countries(self, *countries: Country):
         """
@@ -252,7 +248,7 @@ class StockScreener(Screener):
         :return: None
         """
         for country in countries:
-            self.add_filter(Filter(FilterType.COUNTRY, FilterOperator.EQUAL, country.value))
+            self.add_filter(FilterType.COUNTRY, FilterOperator.EQUAL, country.value)
 
     def set_exchanges(self, *exchanges: Exchange):
         """
@@ -261,7 +257,7 @@ class StockScreener(Screener):
         :return: None
         """
         for exchange in exchanges:
-            self.add_filter(Filter(FilterType.EXCHANGE, FilterOperator.EQUAL, exchange.value))
+            self.add_filter(FilterType.EXCHANGE, FilterOperator.EQUAL, exchange.value)
 
 
 class ForexScreener(Screener):
@@ -282,7 +278,7 @@ class ForexScreener(Screener):
         :return: None
         """
         for region in regions:
-            self.add_filter(Filter(FilterType.REGION, FilterOperator.EQUAL, region.value))
+            self.add_filter(FilterType.REGION, FilterOperator.EQUAL, region.value)
 
 
 class CryptoScreener(Screener):
