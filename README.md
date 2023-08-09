@@ -66,4 +66,4 @@ df = cs.get()
 
 ## Parameters
 
-For Options and Filters, please check the [notebooks](https://raw.githubusercontent.com/houseofai/tvscreener/main/notebooks/)
+For Options and Filters, please check the [notebooks](https://github.com/houseofai/tvscreener/tree/main/notebooks) for examples.
