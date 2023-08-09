@@ -2,17 +2,17 @@ import unittest
 
 import pandas as pd
 
-from tvscreener import StockScreener, TimeInterval, SymbolType
+from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket
 
 
 class TestScreener(unittest.TestCase):
 
-    def test_stockscreener(self):
+    def test_range(self):
         ss = StockScreener()
         df = ss.get()
         self.assertEqual(150, len(df))
 
-    def test_stockscreener_4H(self):
+    def test_time_interval(self):
         ss = StockScreener()
         df = ss.get(time_interval=TimeInterval.FOUR_HOURS)
         self.assertEqual(150, len(df))
@@ -27,7 +27,7 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, "Name"], "AAPL")
 
-    def test_stockscreener_column_order(self):
+    def test_column_order(self):
         ss = StockScreener()
         df = ss.get()
 
@@ -38,7 +38,7 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, "Name"], "AAPL")
 
-    def test_stockscreener_not_multiindex(self):
+    def test_not_multiindex(self):
         ss = StockScreener()
         df = ss.get()
         self.assertIsInstance(df.index, pd.Index)
@@ -50,7 +50,7 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, "Name"], "AAPL")
 
-    def test_stockscreener_multiindex(self):
+    def test_multiindex(self):
         ss = StockScreener()
         df = ss.get()
         df.set_technical_columns()
@@ -63,7 +63,7 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(df.loc[0, ("symbol", "Symbol")], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, ("name", "Name")], "AAPL")
 
-    def test_stockscreener_technical_index(self):
+    def test_technical_index(self):
         ss = StockScreener()
         df = ss.get()
         df.set_technical_columns(only=True)
@@ -75,3 +75,30 @@ class TestScreener(unittest.TestCase):
 
         self.assertEqual(df.loc[0, "symbol"], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, "name"], "AAPL")
+
+    def test_primary_filter(self):
+        ss = StockScreener()
+        ss.set_primary_listing()
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
+        self.assertEqual(df.loc[0, "Name"], "AAPL")
+
+    def test_submarket(self):
+        ss = StockScreener()
+        ss.set_submarkets(SubMarket.OTCQB)
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "OTC:PLDGP")
+        self.assertEqual(df.loc[0, "Name"], "PLDGP")
+
+    def test_submarket_pink(self):
+        ss = StockScreener()
+        ss.set_submarkets(SubMarket.PINK)
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "OTC:LVMHF")
+        self.assertEqual(df.loc[0, "Name"], "LVMHF")

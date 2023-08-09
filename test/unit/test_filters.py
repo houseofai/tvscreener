@@ -1,6 +1,6 @@
 import unittest
 
-from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator
+from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket
 
 
 class TestFilters(unittest.TestCase):
@@ -149,4 +149,17 @@ class TestFilters(unittest.TestCase):
         ss.set_primary_listing()
         ss.set_primary_listing(False)
         self.assertEqual(len(ss.filters), 0)
+
+    def test_submarkets(self):
+        ss = StockScreener()
+        ss.set_submarkets(SubMarket.PINK)
+        self.assertEqual(len(ss.filters), 1)
+        ss.set_submarkets(SubMarket.PINK)
+        self.assertEqual(len(ss.filters), 1)
+        ss.set_submarkets(SubMarket.OTCQB)
+
+        subtypes = ss._get_filter(FilterType.SUBMARKET)
+        self.assertEqual(2, len(subtypes.values))
+        self.assertEqual([SubMarket.PINK.value, SubMarket.OTCQB.value], subtypes.values)
+
 

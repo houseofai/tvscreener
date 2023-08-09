@@ -80,6 +80,12 @@ class StocksMarket(Enum):
         return list(map(lambda c: c.value, cls))
 
 
+class SubMarket(Enum):
+    OTCQB = "OTCQB"
+    OTCQX = "OTCQX"
+    PINK = "PINK"
+
+
 class Type(Enum):
     STOCK = "stock"
     DEPOSITORY_RECEIPT = "dr"
@@ -158,6 +164,7 @@ class FilterType(Enum):
     EXCHANGE = "exchange"
     TYPE = "type"
     SUBTYPE = "subtype"
+    SUBMARKET = "submarket"
 
 
 class Filter:

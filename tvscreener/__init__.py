@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import pandas as pd
 import requests
@@ -7,7 +8,7 @@ from tvscreener.field import TimeInterval, Field
 from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
-from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type
+from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type, SubMarket
 from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
 
@@ -204,6 +205,15 @@ class StockScreener(Screener):
             if market not in market_labels:
                 raise ValueError(f"Unknown market: {market}")
             self.markets.add(market)
+
+    def set_submarkets(self, *submarkets: SubMarket):
+        """
+        Set the submarkets to be scanned
+        :param submarkets: list of submarkets
+        :return: None
+        """
+        for submarket in submarkets:
+            self.add_filter(Filter(FilterType.SUBMARKET, FilterOperator.EQUAL, submarket.value))
 
     def set_primary_listing(self, primary: bool = True):
         """
