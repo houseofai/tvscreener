@@ -75,3 +75,4 @@ class TestScreener(unittest.TestCase):
 
         self.assertEqual(df.loc[0, "symbol"], "NASDAQ:AAPL")
         self.assertEqual(df.loc[0, "name"], "AAPL")
+
