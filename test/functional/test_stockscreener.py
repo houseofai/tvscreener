@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket
+from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country
 
 
 class TestScreener(unittest.TestCase):
@@ -102,3 +102,21 @@ class TestScreener(unittest.TestCase):
 
         self.assertEqual(df.loc[0, "Symbol"], "OTC:LVMHF")
         self.assertEqual(df.loc[0, "Name"], "LVMHF")
+
+    def test_country(self):
+        ss = StockScreener()
+        ss.set_countries(Country.ARGENTINA)
+        df = ss.get()
+        self.assertEqual(17, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "NYSE:YPF")
+        self.assertEqual(df.loc[0, "Name"], "YPF")
+
+    def test_countries(self):
+        ss = StockScreener()
+        ss.set_countries(Country.ARGENTINA, Country.BERMUDA)
+        df = ss.get()
+        self.assertEqual(106, len(df))
+
+        self.assertEqual("NASDAQ:ACGL", df.loc[0, "Symbol"])
+        self.assertEqual("ACGL", df.loc[0, "Name"])

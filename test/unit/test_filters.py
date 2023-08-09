@@ -1,6 +1,7 @@
 import unittest
 
-from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket
+from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket, StocksMarket
+from tvscreener.filter import Country
 
 
 class TestFilters(unittest.TestCase):
@@ -162,4 +163,22 @@ class TestFilters(unittest.TestCase):
         self.assertEqual(2, len(subtypes.values))
         self.assertEqual([SubMarket.PINK.value, SubMarket.OTCQB.value], subtypes.values)
 
+    def test_country(self):
+        ss = StockScreener()
+        ss.set_countries(Country.ARGENTINA)
+        self.assertEqual(len(ss.filters), 1)
 
+        country = ss._get_filter(FilterType.COUNTRY)
+        self.assertEqual(1, len(country.values))
+        self.assertEqual(Country.ARGENTINA.value, country.values[0])
+
+    def test_countries(self):
+        ss = StockScreener()
+        ss.set_countries(Country.ARGENTINA)
+        ss.set_countries(Country.BERMUDA)
+        self.assertEqual(len(ss.filters), 1)
+
+        country = ss._get_filter(FilterType.COUNTRY)
+        self.assertEqual(2, len(country.values))
+        self.assertEqual(Country.ARGENTINA.value, country.values[0])
+        self.assertEqual(Country.BERMUDA.value, country.values[1])
