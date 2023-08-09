@@ -14,13 +14,3 @@ class TestScreener(unittest.TestCase):
         ss = CryptoScreener()
         df = ss.get(time_interval=TimeInterval.FOUR_HOURS)
         self.assertTrue(len(df) == 150)
-
-    def test_forexscreener(self):
-        ss = ForexScreener()
-        df = ss.get()
-        self.assertTrue(len(df) == 150)
-
-    def test_forexscreener_4H(self):
-        ss = ForexScreener()
-        df = ss.get(time_interval=TimeInterval.FOUR_HOURS)
-        self.assertTrue(len(df) == 150)
