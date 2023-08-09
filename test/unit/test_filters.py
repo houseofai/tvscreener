@@ -135,3 +135,18 @@ class TestFilters(unittest.TestCase):
         types = ss._get_filter(FilterType.TYPE)
         self.assertEqual(2, len(types.values))
 
+    def test_primary(self):
+        ss = StockScreener()
+        ss.set_primary_listing()
+        self.assertEqual(len(ss.filters), 1)
+
+        subtypes = ss._get_filter(FilterType.PRIMARY)
+        self.assertEqual(1, len(subtypes.values))
+        self.assertEqual(True, subtypes.values[0])
+
+    def test_unset_primary(self):
+        ss = StockScreener()
+        ss.set_primary_listing()
+        ss.set_primary_listing(False)
+        self.assertEqual(len(ss.filters), 0)
+
