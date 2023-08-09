@@ -1,11 +1,27 @@
+import io
 import unittest
+from unittest.mock import patch
 
 import pandas as pd
 
-from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country, Exchange
+from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country, Exchange, MalformedRequestException, \
+    Filter, FilterType, FilterOperator
 
 
 class TestScreener(unittest.TestCase):
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_stdout(self, mock_stdout):
+        ss = StockScreener()
+        ss.get(print_request=True)
+        self.assertIn("filter", mock_stdout.getvalue())
+
+    def test_malformed_request(self):
+        ss = StockScreener()
+        fake_filter = Filter(FilterType.TYPE, FilterOperator.ABOVE_OR_EQUAL, "test")
+        ss.add_filter(fake_filter)
+        with self.assertRaises(MalformedRequestException):
+            ss.get()
 
     def test_range(self):
         ss = StockScreener()
@@ -119,8 +135,8 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(106, len(df))
 
         # WARNING: Order is not guaranteed
-        #self.assertEqual("NASDAQ:ACGL", df.loc[0, "Symbol"])
-        #self.assertEqual("ACGL", df.loc[0, "Name"])
+        # self.assertEqual("NASDAQ:ACGL", df.loc[0, "Symbol"])
+        # self.assertEqual("ACGL", df.loc[0, "Name"])
 
     def test_exchange(self):
         ss = StockScreener()

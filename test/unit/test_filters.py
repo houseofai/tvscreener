@@ -1,7 +1,7 @@
 import unittest
 
 from tvscreener import StockScreener, Type, FilterType, SymbolType, FilterOperator, SubMarket, StocksMarket
-from tvscreener.filter import Country, Exchange
+from tvscreener.filter import Country, Exchange, Rating
 
 
 class TestFilters(unittest.TestCase):
@@ -58,6 +58,19 @@ class TestFilters(unittest.TestCase):
 
         types = ss._get_filter(FilterType.TYPE)
         self.assertIn(Type.STRUCTURED.value, types.values)
+        self.assertEqual(types.operation, FilterOperator.EQUAL)
+
+    def test_mutual_subtype(self):
+        ss = StockScreener()
+        ss.set_subtypes(SymbolType.MUTUAL_FUND)
+        self.assertEqual(len(ss.filters), 2)
+
+        subtypes = ss._get_filter(FilterType.SUBTYPE)
+        self.assertEqual(subtypes.values, SymbolType.MUTUAL_FUND.value)
+        self.assertEqual(subtypes.operation, FilterOperator.EQUAL)
+
+        types = ss._get_filter(FilterType.TYPE)
+        self.assertIn(Type.FUND.value, types.values)
         self.assertEqual(types.operation, FilterOperator.EQUAL)
 
     def test_preferred_subtype(self):
@@ -202,3 +215,27 @@ class TestFilters(unittest.TestCase):
         self.assertEqual(2, len(exchange.values))
         self.assertEqual(Exchange.NASDAQ.value, exchange.values[0])
         self.assertEqual(Exchange.NYSE.value, exchange.values[1])
+
+    def test_stockmarket_names(self):
+        self.assertIn("GREECE", StocksMarket.names())
+
+    def test_stockmarket_values(self):
+        self.assertIn("venezuela", StocksMarket.values())
+
+    def test_rating(self):
+        self.assertIn(0.63, Rating.STRONG_BUY)
+        self.assertNotIn(0.4, Rating.STRONG_SELL)
+
+    def test_rating_range(self):
+        self.assertEqual([-0.5, -0.1], Rating.SELL.range())
+
+    def test_rating_find(self):
+        self.assertEqual(Rating.STRONG_BUY, Rating.find(0.63))
+        self.assertEqual(Rating.UNKNOWN, Rating.find(1.5))
+        self.assertEqual(Rating.UNKNOWN, Rating.find(None))
+
+    def test_rating_names(self):
+        self.assertIn("STRONG_BUY", Rating.names())
+
+    def test_rating_values(self):
+        self.assertIn(Rating.STRONG_BUY.value, Rating.values())

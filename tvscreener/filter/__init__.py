@@ -269,16 +269,3 @@ class Filter:
         return {"left": self.filter_type.value, "operation": self.operation.value, "right": right}
 
 
-class PrimaryFilter(Filter):
-    def __init__(self):
-        super().__init__(FilterType.PRIMARY, FilterOperator.EQUAL, True)
-
-
-class ExchangeFilter(Filter):
-    def __init__(self, exchanges: list):
-        super().__init__(FilterType.EXCHANGE, FilterOperator.IN_RANGE, exchanges)
-
-
-class RatingFilter(Filter):
-    def __init__(self, field: Field, rating: Rating):
-        super().__init__(field, FilterOperator.IN_RANGE, rating.range())

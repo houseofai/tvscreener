@@ -6,8 +6,8 @@ from tvscreener.field import add_historical, add_time_interval, add_rec, add_rec
 
 
 class MalformedRequestException(Exception):
-    def __init__(self, code, request, url, payload):
-        message = f"Error: {code}: {request.text}\n"
+    def __init__(self, code, response_msg, url, payload):
+        message = f"Error: {code}: {response_msg}\n"
         message += f"Request: {url}\n"
         message += "Payload:\n"
         message += payload
@@ -81,11 +81,6 @@ def _format_timed_fields(field_):
         elif num in ['1W', '1M']:
             return field_.replace('.', '|')
     return field_
-
-
-def _get_computed_recommendation_field(field):
-    if field.format == 'computed_recommendation':
-        return field.get_rec_field()
 
 
 def is_status_code_ok(response):

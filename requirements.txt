@@ -1,5 +1,6 @@
+python~=3.11
 pandas
-requests
+requests~=2.31
 jinja2
 selenium
 tqdm
