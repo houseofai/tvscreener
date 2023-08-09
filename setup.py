@@ -7,9 +7,9 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '0.0.11'
+VERSION = '0.0.12'
 DESCRIPTION = 'TradingView Screener API'
-LONG_DESCRIPTION = 'Python library to retrieve data from TradingView Screener.'
+LONG_DESCRIPTION = 'A simple Python library to retrieve data from TradingView Screener'
 
 # Setting up
 setup(
@@ -24,5 +24,5 @@ setup(
     packages=find_packages(),
     install_requires=['pandas', 'requests>=2.27.1'],
     keywords='finance tradingview technical-analysis',
-    python_requires='>=3.6',
+    python_requires='>=3.10',
 )
