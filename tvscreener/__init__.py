@@ -69,6 +69,9 @@ class Screener:
             if filter_.filter_type == filter_type:
                 return filter_
 
+    def remove_filter(self, filter_type: FilterType):
+        self.filters = [filter_ for filter_ in self.filters if filter_.filter_type != filter_type]
+
     def add_filter(self, filter_: Filter):
         # filter_val = {"left": filter_, "operation": operation.value, "right": values}
         # Case where the filter already exists, and we want to add more values
@@ -201,6 +204,17 @@ class StockScreener(Screener):
             if market not in market_labels:
                 raise ValueError(f"Unknown market: {market}")
             self.markets.add(market)
+
+    def set_primary_listing(self, primary: bool = True):
+        """
+        Set the primary filter
+        :param primary: True or False
+        :return: None
+        """
+        if primary:
+            self.add_filter(Filter(FilterType.PRIMARY, FilterOperator.EQUAL, True))
+        else:
+            self.remove_filter(FilterType.PRIMARY)
 
     def _add_types(self, *types: Type):
         if len(types) > 1:
