@@ -169,6 +169,13 @@ class SubMarket(Enum):
     PINK = "PINK"
 
 
+class Exchange(Enum):
+    OTC = "OTC"
+    AMEX = "AMEX"
+    NASDAQ = "NASDAQ"
+    NYSE = "NYSE"
+
+
 class Type(Enum):
     STOCK = "stock"
     DEPOSITORY_RECEIPT = "dr"
