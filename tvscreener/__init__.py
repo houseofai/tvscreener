@@ -74,20 +74,29 @@ class Screener:
     def remove_filter(self, filter_type: FilterType):
         self.filters = [filter_ for filter_ in self.filters if filter_.filter_type != filter_type]
 
+    @staticmethod
+    def _merge_filters(current_filter: Filter, new_filter: Filter):
+        if not set(new_filter.values).issubset(set(current_filter.values)):
+            # Set the operation is IN_RANGE with multiple values
+            current_filter.operation = FilterOperator.IN_RANGE
+            current_filter.values.extend(new_filter.values)
+        return current_filter
+
+    def _add_new_filter(self, filter_: Filter):
+        # Case where the filter does not exist
+        # If the filter contains values array with only one value, we can use EQUAL instead of IN_RANGE
+        if len(filter_.values) == 1 and filter_.operation == FilterOperator.IN_RANGE:
+            filter_.operation = FilterOperator.EQUAL
+        self.filters.append(filter_)
+
     def add_filter(self, filter_: Filter):
         # filter_val = {"left": filter_, "operation": operation.value, "right": values}
         # Case where the filter already exists, and we want to add more values
         existing_filter = self._get_filter(filter_.filter_type)
-        if existing_filter and not set(filter_.values).issubset(set(existing_filter.values)):
-            # Set the operation is IN_RANGE with multiple values
-            existing_filter.operation = FilterOperator.IN_RANGE
-            existing_filter.values.extend(filter_.values)
-        elif not existing_filter:
-            # Case where the filter does not exist
-            # If the filter contains values array with only one value, we can use EQUAL instead of IN_RANGE
-            if len(filter_.values) == 1 and filter_.operation == FilterOperator.IN_RANGE:
-                filter_.operation = FilterOperator.EQUAL
-            self.filters.append(filter_)
+        if existing_filter:
+            self._merge_filters(existing_filter, filter_)
+        else:
+            self._add_new_filter(filter_)
 
     def add_option(self, key, value):
         self.options[key] = value
