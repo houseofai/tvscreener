@@ -154,3 +154,12 @@ class TestScreener(unittest.TestCase):
 
         self.assertEqual(df.loc[0, "Symbol"], "AMEX:LNG")
         self.assertEqual(df.loc[0, "Name"], "LNG")
+
+    def test_current_trading_day(self):
+        ss = StockScreener()
+        ss.set_current_trading_day()
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
+        self.assertEqual(df.loc[0, "Name"], "AAPL")

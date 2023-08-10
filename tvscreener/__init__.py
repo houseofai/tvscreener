@@ -16,9 +16,9 @@ from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, 
 default_market = StocksMarket.AMERICA
 default_min_range = 0
 default_max_range = 150
-default_sort_stocks = "market_cap_basic"
-default_sort_crypto = "24h_vol|5"
-default_sort_forex = "name"
+default_sort_stocks = StockField.MARKET_CAPITALIZATION
+default_sort_crypto = CryptoField.VOLUME_24H_IN_USD
+default_sort_forex = ForexField.NAME
 
 
 class ScreenerDataFrame(pd.DataFrame):
@@ -66,13 +66,15 @@ class Screener:
     def search(self, value: str):
         self.add_filter(FilterType.SEARCH, FilterOperator.MATCH, value)
 
-    def _get_filter(self, filter_type: FilterType) -> Filter:
+    def _get_filter(self, filter_type: Field) -> Filter:
         for filter_ in self.filters:
-            if filter_.filter_type == filter_type:
+            if filter_.field == filter_type:
                 return filter_
 
-    def remove_filter(self, filter_type: FilterType):
-        self.filters = [filter_ for filter_ in self.filters if filter_.filter_type != filter_type]
+    def remove_filter(self, filter_type: FilterType | Field):
+        filter_ = self._get_filter(filter_type)
+        if filter_:
+            self.filters.remove(filter_)
 
     @staticmethod
     def _merge_filters(current_filter: Filter, new_filter: Filter):
@@ -89,11 +91,10 @@ class Screener:
             filter_.operation = FilterOperator.EQUAL
         self.filters.append(filter_)
 
-    def add_filter(self, filter_type: FilterType, operation: FilterOperator, *values: Enum or str):
+    def add_filter(self, filter_type: Field | FilterType, operation: FilterOperator, values: Enum or str):
         filter_ = Filter(filter_type, operation, values)
-        # filter_val = {"left": filter_, "operation": operation.value, "right": values}
         # Case where the filter already exists, and we want to add more values
-        existing_filter = self._get_filter(filter_.filter_type)
+        existing_filter = self._get_filter(filter_.field)
         if existing_filter:
             self._merge_filters(existing_filter, filter_)
         else:
@@ -108,8 +109,8 @@ class Screener:
     def set_range(self, from_range: int = default_min_range, to_range: int = default_max_range) -> None:
         self.range = [from_range, to_range]
 
-    def sort_by(self, sort_by, order="desc"):
-        self.sort = {"sortBy": sort_by, "sortOrder": order}
+    def sort_by(self, sort_by: Field, ascending=True):
+        self.sort = {"sortBy": sort_by.field_name, "sortOrder": "asc" if ascending else "desc"}
 
     def _build_payload(self, requested_columns_):
         payload = {
@@ -153,7 +154,7 @@ class StockScreener(Screener):
 
         self.url = get_url("global")
         self.specific_fields = StockField  # {**self.columns, **tvdata.stock['columns']}
-        self.sort_by(default_sort_stocks, "desc")
+        self.sort_by(default_sort_stocks, False)
 
     def _build_payload(self, requested_columns_):
         payload = super()._build_payload(requested_columns_)
@@ -235,6 +236,17 @@ class StockScreener(Screener):
         else:
             self.remove_filter(FilterType.PRIMARY)
 
+    def set_current_trading_day(self, current: bool = True):
+        """
+        Set the current trading day filter
+        :param current: True or False
+        :return: None
+        """
+        if current:
+            self.add_filter(FilterType.CURRENT_TRADING_DAY, FilterOperator.EQUAL, True)
+        else:
+            self.remove_filter(FilterType.CURRENT_TRADING_DAY)
+
     def set_submarkets(self, *submarkets: SubMarket):
         """
         Set the submarkets to be scanned
@@ -271,7 +283,7 @@ class ForexScreener(Screener):
         self.markets = set(subtype)
         self.specific_fields = ForexField  # {**self.fields, **tvdata.forex['columns']}
         # self.add_filter("sector", FilterOperation.IN_RANGE, ['Major', 'Minor'])
-        self.sort_by(default_sort_forex, "asc")
+        self.sort_by(default_sort_forex)
         self.add_misc("symbols", {"query": {"types": ["forex"]}})
 
     def set_regions(self, *regions: Region):
@@ -291,5 +303,5 @@ class CryptoScreener(Screener):
         self.markets = set(subtype)
         self.url = get_url(subtype)
         self.specific_fields = CryptoField
-        self.sort_by(default_sort_crypto, "desc")
+        self.sort_by(default_sort_crypto, False)
         self.add_misc("price_conversion", {"to_symbol": False})
