@@ -1,6 +1,8 @@
 import math
 from enum import Enum
 
+from tvscreener import Field
+
 
 class StocksMarket(Enum):
     ALL = "ALL"
@@ -257,6 +259,7 @@ class FilterOperator(Enum):
 
 
 class FilterType(Enum):
+    CURRENT_TRADING_DAY = "active_symbol"
     SEARCH = "name,description"
     PRIMARY = "is_primary"
     EXCHANGE = "exchange"
@@ -268,11 +271,15 @@ class FilterType(Enum):
 
 
 class Filter:
-    def __init__(self, filter_type: FilterType, operation: FilterOperator, values):
-        self.filter_type = filter_type
+    def __init__(self, field:  Field | FilterType, operation: FilterOperator, values):
+        self.field = field
         self.operation = operation
         self.values = values if isinstance(values, list) else [values]
 
+    def name(self):
+        return self.field.field_name if isinstance(self.field, Field) else self.field.value
+
     def to_dict(self):
         right = self.values[0] if len(self.values) == 1 else self.values
-        return {"left": self.filter_type.value, "operation": self.operation.value, "right": right}
+        left = self.field.value if isinstance(self.field, FilterType) else self.field.field_name
+        return {"left": left, "operation": self.operation.value, "right": right}

@@ -255,6 +255,14 @@ class TestStockFilters(unittest.TestCase):
     def test_rating_values(self):
         self.assertIn(Rating.STRONG_BUY.value, Rating.values())
 
+    def test_current_trading_days(self):
+        ss = StockScreener()
+        ss.set_current_trading_day()
+        self.assertEqual(len(ss.filters), 1)
+
+        current_trading_day = ss._get_filter(FilterType.CURRENT_TRADING_DAY)
+        self.assertEqual(True, current_trading_day.values[0])
+
 
 class TestForexFilters(unittest.TestCase):
     def test_region(self):
