@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country, Exchange, MalformedRequestException, \
-    Filter, FilterType, FilterOperator
+    FilterType, FilterOperator, StocksMarket
 
 
 class TestScreener(unittest.TestCase):
@@ -18,8 +18,7 @@ class TestScreener(unittest.TestCase):
 
     def test_malformed_request(self):
         ss = StockScreener()
-        fake_filter = Filter(FilterType.TYPE, FilterOperator.ABOVE_OR_EQUAL, "test")
-        ss.add_filter(fake_filter)
+        ss.add_filter(FilterType.TYPE, FilterOperator.ABOVE_OR_EQUAL, "test")
         with self.assertRaises(MalformedRequestException):
             ss.get()
 
@@ -99,6 +98,15 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(150, len(df))
 
         self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
+        self.assertEqual(df.loc[0, "Name"], "AAPL")
+
+    def test_market(self):
+        ss = StockScreener()
+        ss.set_markets(StocksMarket.ARGENTINA)
+        df = ss.get()
+        self.assertEqual(150, len(df))
+
+        self.assertEqual(df.loc[0, "Symbol"], "BCBA:AAPL")
         self.assertEqual(df.loc[0, "Name"], "AAPL")
 
     def test_submarket(self):

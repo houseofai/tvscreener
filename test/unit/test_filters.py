@@ -9,12 +9,17 @@ class TestStockFilters(unittest.TestCase):
     def test_set_markets(self):
         ss = StockScreener()
         ss.set_markets(StocksMarket.JAPAN, StocksMarket.FRANCE)
-        self.assertEqual({StocksMarket.JAPAN, StocksMarket.FRANCE}, ss.markets)
+        self.assertEqual([StocksMarket.JAPAN, StocksMarket.FRANCE], ss.markets)
 
     def test_set_markets_unique(self):
         ss = StockScreener()
         ss.set_markets(StocksMarket.JAPAN)
-        self.assertEqual({StocksMarket.JAPAN}, ss.markets)
+        self.assertEqual([StocksMarket.JAPAN], ss.markets)
+
+    def test_set_markets_all(self):
+        ss = StockScreener()
+        ss.set_markets(StocksMarket.ALL)
+        self.assertEqual([m for m in StocksMarket], ss.markets)
 
     def test_stock_additional_subtypes(self):
         ss = StockScreener()

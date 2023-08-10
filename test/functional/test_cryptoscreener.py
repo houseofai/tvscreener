@@ -1,6 +1,6 @@
 import unittest
 
-from tvscreener import StockScreener, CryptoScreener, ForexScreener, TimeInterval
+from tvscreener import CryptoScreener, TimeInterval
 
 
 class TestScreener(unittest.TestCase):

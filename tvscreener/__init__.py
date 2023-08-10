@@ -13,7 +13,7 @@ from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, Filt
 from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
 
-default_market = ["america"]
+default_market = StocksMarket.AMERICA
 default_min_range = 0
 default_max_range = 150
 default_sort_stocks = "market_cap_basic"
@@ -149,7 +149,7 @@ class StockScreener(Screener):
     def __init__(self):
         super().__init__()
         # subtype = "stock"
-        self.markets = set(default_market)
+        self.markets = [default_market]
 
         self.url = get_url("global")
         self.specific_fields = StockField  # {**self.columns, **tvdata.stock['columns']}
@@ -158,7 +158,7 @@ class StockScreener(Screener):
     def _build_payload(self, requested_columns_):
         payload = super()._build_payload(requested_columns_)
         if self.markets:
-            payload["markets"] = list(self.markets)
+            payload["markets"] = [market.value for market in self.markets]
         return payload
 
     def _add_types(self, *types: Type):
@@ -220,9 +220,9 @@ class StockScreener(Screener):
         :return: None
         """
         if StocksMarket.ALL in markets:
-            self.markets = set([market.value for market in StocksMarket])
+            self.markets = [market for market in StocksMarket]
         else:
-            self.markets = set([market.value for market in markets])
+            self.markets = [market for market in markets]
 
     def set_primary_listing(self, primary: bool = True):
         """
