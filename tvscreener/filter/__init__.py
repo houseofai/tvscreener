@@ -1,10 +1,9 @@
 import math
 from enum import Enum
 
-from tvscreener import Field
-
 
 class StocksMarket(Enum):
+    ALL = "ALL"
     AMERICA = "america"
     UK = "uk"
     INDIA = "india"

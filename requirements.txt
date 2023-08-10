@@ -7,3 +7,4 @@ tqdm
 setuptools
 pytest
 pytest-cov
+notebook==7.0.2

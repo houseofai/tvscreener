@@ -25,7 +25,7 @@ class ScreenerDataFrame(pd.DataFrame):
     def __init__(self, data, columns: dict, *args, **kwargs):
         # Add the extra received columns
         columns = {"symbol": "Symbol", **columns}
-        super().__init__(data, columns=columns.values(), *args, **kwargs)
+        super().__init__(data, columns=list(columns.values()), *args, **kwargs)
 
         # Reorder columns
         first_columns = ['symbol', 'name', 'description']
@@ -219,7 +219,10 @@ class StockScreener(Screener):
         :param markets: list of markets
         :return: None
         """
-        self.markets = set(markets)
+        if StocksMarket.ALL in markets:
+            self.markets = set([market.value for market in StocksMarket])
+        else:
+            self.markets = set([market.value for market in markets])
 
     def set_primary_listing(self, primary: bool = True):
         """
