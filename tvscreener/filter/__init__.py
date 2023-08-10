@@ -165,11 +165,11 @@ class Country(Enum):
 
 
 class Region(Enum):
-    AFRICA = "Africa",
-    AMERICAS = "Americas",
-    ASIA = "Asia",
-    EUROPE = "Europe",
-    MIDDLE_EAST = "Middle East",
+    AFRICA = "Africa"
+    AMERICAS = "Americas"
+    ASIA = "Asia"
+    EUROPE = "Europe"
+    MIDDLE_EAST = "Middle East"
     PACIFIC = "Pacific"
 
 
@@ -258,28 +258,33 @@ class FilterOperator(Enum):
     MATCH = "match"
 
 
-class FilterType(Enum):
+class ExtraFilter(Enum):
     CURRENT_TRADING_DAY = "active_symbol"
     SEARCH = "name,description"
     PRIMARY = "is_primary"
-    EXCHANGE = "exchange"
-    TYPE = "type"
-    SUBTYPE = "subtype"
-    SUBMARKET = "submarket"
-    COUNTRY = "country"
-    REGION = "country"
+    # EXCHANGE = "exchange"
+    # TYPE = "type"
+    # SUBTYPE = "subtype"
+    # SUBMARKET = "submarket"
+    # COUNTRY = "country"
+    # REGION = "country"
+
+    def __init__(self, value):
+        # self.value = value
+        self.field_name = value
 
 
 class Filter:
-    def __init__(self, field:  Field | FilterType, operation: FilterOperator, values):
+    def __init__(self, field: Field | ExtraFilter, operation: FilterOperator, values):
         self.field = field
         self.operation = operation
         self.values = values if isinstance(values, list) else [values]
 
-    def name(self):
-        return self.field.field_name if isinstance(self.field, Field) else self.field.value
+#    def name(self):
+#        return self.field.field_name if isinstance(self.field, Field) else self.field.value
 
     def to_dict(self):
-        right = self.values[0] if len(self.values) == 1 else self.values
-        left = self.field.value if isinstance(self.field, FilterType) else self.field.field_name
+        right = [filter_enum.value if isinstance(filter_enum, Enum) else filter_enum for filter_enum in self.values]
+        right = right[0] if len(right) == 1 else right
+        left = self.field.field_name
         return {"left": left, "operation": self.operation.value, "right": right}
