@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from tvscreener import StockScreener, TimeInterval, SymbolType, SubMarket, Country, Exchange, MalformedRequestException, \
-    FilterType, FilterOperator, StocksMarket
+    ExtraFilter, FilterOperator, StocksMarket, StockField
 
 
 class TestScreener(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestScreener(unittest.TestCase):
 
     def test_malformed_request(self):
         ss = StockScreener()
-        ss.add_filter(FilterType.TYPE, FilterOperator.ABOVE_OR_EQUAL, "test")
+        ss.add_filter(StockField.TYPE, FilterOperator.ABOVE_OR_EQUAL, "test")
         with self.assertRaises(MalformedRequestException):
             ss.get()
 
@@ -58,12 +58,12 @@ class TestScreener(unittest.TestCase):
         df = ss.get()
         self.assertIsInstance(df.index, pd.Index)
 
-        self.assertEqual(df.columns[0], "Symbol")
-        self.assertEqual(df.columns[1], "Name")
-        self.assertEqual(df.columns[2], "Description")
+        self.assertEqual("Symbol", df.columns[0])
+        self.assertEqual("Name", df.columns[1])
+        self.assertEqual("Description", df.columns[2])
 
-        self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
-        self.assertEqual(df.loc[0, "Name"], "AAPL")
+        self.assertEqual("NASDAQ:AAPL", df.loc[0, "Symbol"])
+        self.assertEqual("AAPL", df.loc[0, "Name"])
 
     def test_multiindex(self):
         ss = StockScreener()
@@ -71,12 +71,12 @@ class TestScreener(unittest.TestCase):
         df.set_technical_columns()
         self.assertNotIsInstance(df.index, pd.MultiIndex)
 
-        self.assertEqual(df.columns[0], ("symbol", "Symbol"))
-        self.assertEqual(df.columns[1], ("name", "Name"))
-        self.assertEqual(df.columns[2], ("description", "Description"))
+        self.assertEqual(("symbol", "Symbol"), df.columns[0])
+        self.assertEqual(("name", "Name"), df.columns[1])
+        self.assertEqual(("description", "Description"), df.columns[2])
 
-        self.assertEqual(df.loc[0, ("symbol", "Symbol")], "NASDAQ:AAPL")
-        self.assertEqual(df.loc[0, ("name", "Name")], "AAPL")
+        self.assertEqual("NASDAQ:AAPL", df.loc[0, ("symbol", "Symbol")])
+        self.assertEqual("AAPL", df.loc[0, ("name", "Name")])
 
     def test_technical_index(self):
         ss = StockScreener()
@@ -88,17 +88,17 @@ class TestScreener(unittest.TestCase):
         self.assertEqual(df.columns[1], "name")
         self.assertEqual(df.columns[2], "description")
 
-        self.assertEqual(df.loc[0, "symbol"], "NASDAQ:AAPL")
-        self.assertEqual(df.loc[0, "name"], "AAPL")
+        self.assertEqual("NASDAQ:AAPL", df.loc[0, "symbol"])
+        self.assertEqual("AAPL", df.loc[0, "name"])
 
     def test_primary_filter(self):
         ss = StockScreener()
-        ss.set_primary_listing()
+        ss.add_filter(ExtraFilter.PRIMARY, FilterOperator.EQUAL, True)
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
-        self.assertEqual(df.loc[0, "Name"], "AAPL")
+        self.assertEqual("NASDAQ:AAPL", df.loc[0, "Symbol"])
+        self.assertEqual("AAPL", df.loc[0, "Name"])
 
     def test_market(self):
         ss = StockScreener()
@@ -106,39 +106,40 @@ class TestScreener(unittest.TestCase):
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "BCBA:AAPL")
-        self.assertEqual(df.loc[0, "Name"], "AAPL")
+        self.assertEqual("BCBA:AAPL", df.loc[0, "Symbol"], )
+        self.assertEqual("AAPL", df.loc[0, "Name"])
 
     def test_submarket(self):
         ss = StockScreener()
-        ss.set_submarkets(SubMarket.OTCQB)
+        ss.add_filter(StockField.SUBMARKET, FilterOperator.EQUAL, SubMarket.OTCQB)
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "OTC:PLDGP")
-        self.assertEqual(df.loc[0, "Name"], "PLDGP")
+        self.assertEqual("OTC:PLDGP", df.loc[0, "Symbol"])
+        self.assertEqual("PLDGP", df.loc[0, "Name"])
 
     def test_submarket_pink(self):
         ss = StockScreener()
-        ss.set_submarkets(SubMarket.PINK)
+        ss.add_filter(StockField.SUBMARKET, FilterOperator.EQUAL, SubMarket.PINK)
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "OTC:LVMHF")
-        self.assertEqual(df.loc[0, "Name"], "LVMHF")
+        self.assertEqual("OTC:LVMHF", df.loc[0, "Symbol"])
+        self.assertEqual("LVMHF", df.loc[0, "Name"])
 
     def test_country(self):
         ss = StockScreener()
-        ss.set_countries(Country.ARGENTINA)
+        ss.add_filter(StockField.COUNTRY, FilterOperator.EQUAL, Country.ARGENTINA)
         df = ss.get()
         self.assertEqual(17, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "NYSE:YPF")
-        self.assertEqual(df.loc[0, "Name"], "YPF")
+        self.assertEqual("NYSE:YPF", df.loc[0, "Symbol"])
+        self.assertEqual("YPF", df.loc[0, "Name"])
 
     def test_countries(self):
         ss = StockScreener()
-        ss.set_countries(Country.ARGENTINA, Country.BERMUDA)
+        ss.add_filter(StockField.COUNTRY, FilterOperator.EQUAL, Country.ARGENTINA)
+        ss.add_filter(StockField.COUNTRY, FilterOperator.EQUAL, Country.BERMUDA)
         df = ss.get()
         self.assertEqual(106, len(df))
 
@@ -148,18 +149,18 @@ class TestScreener(unittest.TestCase):
 
     def test_exchange(self):
         ss = StockScreener()
-        ss.set_exchanges(Exchange.NYSE_ARCA)
+        ss.add_filter(StockField.EXCHANGE, FilterOperator.EQUAL, Exchange.NYSE_ARCA)
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "AMEX:LNG")
-        self.assertEqual(df.loc[0, "Name"], "LNG")
+        self.assertEqual("AMEX:LNG", df.loc[0, "Symbol"])
+        self.assertEqual("LNG", df.loc[0, "Name"])
 
     def test_current_trading_day(self):
         ss = StockScreener()
-        ss.set_current_trading_day()
+        ss.add_filter(ExtraFilter.CURRENT_TRADING_DAY, FilterOperator.EQUAL, True)
         df = ss.get()
         self.assertEqual(150, len(df))
 
-        self.assertEqual(df.loc[0, "Symbol"], "NASDAQ:AAPL")
-        self.assertEqual(df.loc[0, "Name"], "AAPL")
+        self.assertEqual("NASDAQ:AAPL", df.loc[0, "Symbol"])
+        self.assertEqual("AAPL", df.loc[0, "Name"])

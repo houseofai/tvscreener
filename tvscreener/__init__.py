@@ -8,7 +8,7 @@ from tvscreener.field import TimeInterval, Field
 from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
-from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, FilterType, SymbolType, Type, SubMarket, \
+from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, ExtraFilter, SymbolType, Type, SubMarket, \
     Country, Exchange, Region
 from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
@@ -64,14 +64,14 @@ class Screener:
     #    self.filters.append(filter_val)
 
     def search(self, value: str):
-        self.add_filter(FilterType.SEARCH, FilterOperator.MATCH, value)
+        self.add_filter(ExtraFilter.SEARCH, FilterOperator.MATCH, value)
 
-    def _get_filter(self, filter_type: Field) -> Filter:
+    def _get_filter(self, filter_type: Field | ExtraFilter) -> Filter:
         for filter_ in self.filters:
             if filter_.field == filter_type:
                 return filter_
 
-    def remove_filter(self, filter_type: FilterType | Field):
+    def remove_filter(self, filter_type: ExtraFilter | Field):
         filter_ = self._get_filter(filter_type)
         if filter_:
             self.filters.remove(filter_)
@@ -91,7 +91,7 @@ class Screener:
             filter_.operation = FilterOperator.EQUAL
         self.filters.append(filter_)
 
-    def add_filter(self, filter_type: Field | FilterType, operation: FilterOperator, values: Enum or str):
+    def add_filter(self, filter_type: Field | ExtraFilter, operation: FilterOperator, values: Enum or str):
         filter_ = Filter(filter_type, operation, values)
         # Case where the filter already exists, and we want to add more values
         existing_filter = self._get_filter(filter_.field)
@@ -169,7 +169,7 @@ class StockScreener(Screener):
             operator = FilterOperator.EQUAL
 
         for type_ in types:
-            self.add_filter(FilterType.TYPE, operator, type_.value)
+            self.add_filter(StockField.TYPE, operator, type_.value)
 
     def set_symbol_types(self, *symbol_types: SymbolType):
         """
@@ -212,7 +212,7 @@ class StockScreener(Screener):
             symbol_types.append(SymbolType.DEPOSITORY_RECEIPT)
 
         for symbol_type in symbol_types:
-            self.add_filter(FilterType.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy())
+            self.add_filter(StockField.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy())
 
     def set_markets(self, *markets: StocksMarket):
         """
@@ -225,55 +225,6 @@ class StockScreener(Screener):
         else:
             self.markets = [market for market in markets]
 
-    def set_primary_listing(self, primary: bool = True):
-        """
-        Set the primary filter
-        :param primary: True or False
-        :return: None
-        """
-        if primary:
-            self.add_filter(FilterType.PRIMARY, FilterOperator.EQUAL, True)
-        else:
-            self.remove_filter(FilterType.PRIMARY)
-
-    def set_current_trading_day(self, current: bool = True):
-        """
-        Set the current trading day filter
-        :param current: True or False
-        :return: None
-        """
-        if current:
-            self.add_filter(FilterType.CURRENT_TRADING_DAY, FilterOperator.EQUAL, True)
-        else:
-            self.remove_filter(FilterType.CURRENT_TRADING_DAY)
-
-    def set_submarkets(self, *submarkets: SubMarket):
-        """
-        Set the submarkets to be scanned
-        :param submarkets: list of submarkets
-        :return: None
-        """
-        for submarket in submarkets:
-            self.add_filter(FilterType.SUBMARKET, FilterOperator.EQUAL, submarket.value)
-
-    def set_countries(self, *countries: Country):
-        """
-        Set the country to be scanned
-        :param countries: list of countries
-        :return: None
-        """
-        for country in countries:
-            self.add_filter(FilterType.COUNTRY, FilterOperator.EQUAL, country.value)
-
-    def set_exchanges(self, *exchanges: Exchange):
-        """
-        Set the exchanges to be scanned
-        :param exchanges: list of exchanges
-        :return: None
-        """
-        for exchange in exchanges:
-            self.add_filter(FilterType.EXCHANGE, FilterOperator.EQUAL, exchange.value)
-
 
 class ForexScreener(Screener):
     def __init__(self):
@@ -285,15 +236,6 @@ class ForexScreener(Screener):
         # self.add_filter("sector", FilterOperation.IN_RANGE, ['Major', 'Minor'])
         self.sort_by(default_sort_forex)
         self.add_misc("symbols", {"query": {"types": ["forex"]}})
-
-    def set_regions(self, *regions: Region):
-        """
-        Set the regions to be scanned
-        :param regions: list of regions
-        :return: None
-        """
-        for region in regions:
-            self.add_filter(FilterType.REGION, FilterOperator.EQUAL, region.value)
 
 
 class CryptoScreener(Screener):
