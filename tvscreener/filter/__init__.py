@@ -81,6 +81,31 @@ class StocksMarket(Enum):
         return list(map(lambda c: c.value, cls))
 
 
+class Sector(Enum):
+    ANY = "Any"
+    COMMERCIAL_SERVICES = "Commercial Services"
+    COMMUNICATIONS = "Communications"
+    CONSUMER_DURABLES = "Consumer Durables"
+    CONSUMER_NON_DURABLES = "Consumer Non-Durables"
+    CONSUMER_SERVICES = "Consumer Services"
+    DISTRIBUTION_SERVICES = "Distribution Services"
+    ELECTRONIC_TECHNOLOGY = "Electronic Technology"
+    ENERGY_MINERALS = "Energy Minerals"
+    FINANCE = "Finance"
+    GOVERNMENT = "Government"
+    HEALTH_SERVICES = "Health Services"
+    HEALTH_TECHNOLOGY = "Health Technology"
+    INDUSTRIAL_SERVICES = "Industrial Services"
+    MISCELLANEOUS = "Miscellaneous"
+    NON_ENERGY_MINERALS = "Non-Energy Minerals"
+    PROCESS_INDUSTRIES = "Process Industries"
+    PRODUCER_MANUFACTURING = "Producer Manufacturing"
+    RETAIL_TRADE = "Retail Trade"
+    TECHNOLOGY_SERVICES = "Technology Services"
+    TRANSPORTATION = "Transportation"
+    UTILITIES = "Utilities"
+
+
 class Country(Enum):
     ANY = "Any"
     ALBANIA = "Albania"
@@ -262,15 +287,8 @@ class ExtraFilter(Enum):
     CURRENT_TRADING_DAY = "active_symbol"
     SEARCH = "name,description"
     PRIMARY = "is_primary"
-    # EXCHANGE = "exchange"
-    # TYPE = "type"
-    # SUBTYPE = "subtype"
-    # SUBMARKET = "submarket"
-    # COUNTRY = "country"
-    # REGION = "country"
 
     def __init__(self, value):
-        # self.value = value
         self.field_name = value
 
 
