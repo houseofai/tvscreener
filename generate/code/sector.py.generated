@@ -1,0 +1,31 @@
+
+# ----------------------
+# Generated file
+# 2023-08-11 07:05:13.154481
+# ----------------------
+from enum import Enum
+
+
+class Sector(Enum):
+    COMMERCIAL_SERVICES = 'Commercial Services'
+    COMMUNICATIONS = 'Communications'
+    CONSUMER_DURABLES = 'Consumer Durables'
+    CONSUMER_NONDURABLES = 'Consumer Non-Durables'
+    CONSUMER_SERVICES = 'Consumer Services'
+    DISTRIBUTION_SERVICES = 'Distribution Services'
+    ELECTRONIC_TECHNOLOGY = 'Electronic Technology'
+    ENERGY_MINERALS = 'Energy Minerals'
+    FINANCE = 'Finance'
+    GOVERNMENT = 'Government'
+    HEALTH_SERVICES = 'Health Services'
+    HEALTH_TECHNOLOGY = 'Health Technology'
+    INDUSTRIAL_SERVICES = 'Industrial Services'
+    MISCELLANEOUS = 'Miscellaneous'
+    NONENERGY_MINERALS = 'Non-Energy Minerals'
+    PROCESS_INDUSTRIES = 'Process Industries'
+    PRODUCER_MANUFACTURING = 'Producer Manufacturing'
+    RETAIL_TRADE = 'Retail Trade'
+    TECHNOLOGY_SERVICES = 'Technology Services'
+    TRANSPORTATION = 'Transportation'
+    UTILITIES = 'Utilities'
+    

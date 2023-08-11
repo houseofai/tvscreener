@@ -1,0 +1,732 @@
+{
+  "change": {
+    "label": "Change %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs": {
+    "label": "Change",
+    "format": "float",
+    "historical": false
+  },
+  "exchange": {
+    "label": "Exchange",
+    "format": "text",
+    "historical": false
+  },
+  "high": {
+    "label": "High",
+    "format": "float",
+    "historical": false
+  },
+  "low": {
+    "label": "Low",
+    "format": "float",
+    "historical": false
+  },
+  "close": {
+    "label": "Price",
+    "format": "float",
+    "historical": false
+  },
+  "Recommend.All": {
+    "label": "Technical Rating",
+    "format": "rating",
+    "historical": false
+  },
+  "volume": {
+    "label": "Volume",
+    "format": "number_group",
+    "historical": false
+  },
+  "24h_vol_change|5": {
+    "label": "Volume 24h Change %",
+    "format": "percent",
+    "historical": false
+  },
+  "24h_vol|5": {
+    "label": "Volume 24h in USD",
+    "format": "number_group",
+    "historical": false
+  },
+  "High.1M": {
+    "label": "1-Month High",
+    "format": "round",
+    "historical": false
+  },
+  "Low.1M": {
+    "label": "1-Month Low",
+    "format": "round",
+    "historical": false
+  },
+  "High.3M": {
+    "label": "3-Month High",
+    "format": "round",
+    "historical": false
+  },
+  "Low.3M": {
+    "label": "3-Month Low",
+    "format": "round",
+    "historical": false
+  },
+  "Perf.3M": {
+    "label": "3-Month Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "Perf.5Y": {
+    "label": "5Y Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "High.6M": {
+    "label": "6-Month High",
+    "format": "round",
+    "historical": false
+  },
+  "Low.6M": {
+    "label": "6-Month Low",
+    "format": "round",
+    "historical": false
+  },
+  "Perf.6M": {
+    "label": "6-Month Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "price_52_week_high": {
+    "label": "52 Week High",
+    "format": "round",
+    "historical": false
+  },
+  "price_52_week_low": {
+    "label": "52 Week Low",
+    "format": "round",
+    "historical": false
+  },
+  "High.All": {
+    "label": "All Time High",
+    "format": "round",
+    "historical": false
+  },
+  "Low.All": {
+    "label": "All Time Low",
+    "format": "round",
+    "historical": false
+  },
+  "Perf.All": {
+    "label": "All Time Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "Aroon.Down": {
+    "label": "Aroon Down (14)",
+    "format": "round",
+    "historical": false
+  },
+  "Aroon.Up": {
+    "label": "Aroon Up (14)",
+    "format": "round",
+    "historical": false
+  },
+  "ask": {
+    "label": "Ask",
+    "format": "float",
+    "historical": false
+  },
+  "total_shares_outstanding": {
+    "label": "Available Coins",
+    "format": "missing",
+    "historical": false
+  },
+  "ADR": {
+    "label": "Average Day Range (14)",
+    "format": "float",
+    "historical": false
+  },
+  "ADX": {
+    "label": "Average Directional Index (14)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "ATR": {
+    "label": "Average True Range (14)",
+    "format": "float",
+    "historical": false
+  },
+  "average_volume_10d_calc": {
+    "label": "Average Volume (10 day)",
+    "format": "number_group",
+    "historical": false
+  },
+  "average_volume_30d_calc": {
+    "label": "Average Volume (30 day)",
+    "format": "number_group",
+    "historical": false
+  },
+  "average_volume_60d_calc": {
+    "label": "Average Volume (60 day)",
+    "format": "number_group",
+    "historical": false
+  },
+  "average_volume_90d_calc": {
+    "label": "Average Volume (90 day)",
+    "format": "number_group",
+    "historical": false
+  },
+  "AO": {
+    "label": "Awesome Oscillator",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "bid": {
+    "label": "Bid",
+    "format": "float",
+    "historical": false
+  },
+  "BB.lower": {
+    "label": "Bollinger Lower Band (20)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "BB.upper": {
+    "label": "Bollinger Upper Band (20)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "BBPower": {
+    "label": "Bull Bear Power",
+    "format": "recommendation",
+    "historical": false
+  },
+  "change.60": {
+    "label": "Change 1h, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.60": {
+    "label": "Change 1h",
+    "format": "round",
+    "historical": false
+  },
+  "change.1": {
+    "label": "Change 1m, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.1": {
+    "label": "Change 1m",
+    "format": "round",
+    "historical": false
+  },
+  "change.1M": {
+    "label": "Change 1M, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.1M": {
+    "label": "Change 1M",
+    "format": "round",
+    "historical": false
+  },
+  "change.1W": {
+    "label": "Change 1W, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.1W": {
+    "label": "Change 1W",
+    "format": "round",
+    "historical": false
+  },
+  "change.240": {
+    "label": "Change 4h, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.240": {
+    "label": "Change 4h",
+    "format": "round",
+    "historical": false
+  },
+  "change.5": {
+    "label": "Change 5m, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.5": {
+    "label": "Change 5m",
+    "format": "round",
+    "historical": false
+  },
+  "change.15": {
+    "label": "Change 15m, %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_abs.15": {
+    "label": "Change 15m",
+    "format": "round",
+    "historical": false
+  },
+  "change_from_open": {
+    "label": "Change from Open %",
+    "format": "percent",
+    "historical": false
+  },
+  "change_from_open_abs": {
+    "label": "Change from Open",
+    "format": "float",
+    "historical": false
+  },
+  "CCI20": {
+    "label": "Commodity Channel Index (20)",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "DonchCh20.Lower": {
+    "label": "Donchian Channels Lower Band (20)",
+    "format": "round",
+    "historical": false
+  },
+  "DonchCh20.Upper": {
+    "label": "Donchian Channels Upper Band (20)",
+    "format": "round",
+    "historical": false
+  },
+  "EMA5": {
+    "label": "Exponential Moving Average (5)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA10": {
+    "label": "Exponential Moving Average (10)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA20": {
+    "label": "Exponential Moving Average (20)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA30": {
+    "label": "Exponential Moving Average (30)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA50": {
+    "label": "Exponential Moving Average (50)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA100": {
+    "label": "Exponential Moving Average (100)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "EMA200": {
+    "label": "Exponential Moving Average (200)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "market_cap_diluted_calc": {
+    "label": "Fully Diluted Market Cap",
+    "format": "missing",
+    "historical": false
+  },
+  "gap": {
+    "label": "Gap %",
+    "format": "percent",
+    "historical": false
+  },
+  "HullMA9": {
+    "label": "Hull Moving Average (9)",
+    "format": "recommendation",
+    "historical": false
+  },
+  "Ichimoku.BLine": {
+    "label": "Ichimoku Base Line (9, 26, 52, 26)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "Ichimoku.CLine": {
+    "label": "Ichimoku Conversion Line (9, 26, 52, 26)",
+    "format": "round",
+    "historical": false
+  },
+  "Ichimoku.Lead1": {
+    "label": "Ichimoku Leading Span A (9, 26, 52, 26)",
+    "format": "float",
+    "historical": false
+  },
+  "Ichimoku.Lead2": {
+    "label": "Ichimoku Leading Span B (9, 26, 52, 26)",
+    "format": "round",
+    "historical": false
+  },
+  "KltChnl.lower": {
+    "label": "Keltner Channels Lower Band (20)",
+    "format": "float",
+    "historical": false
+  },
+  "KltChnl.upper": {
+    "label": "Keltner Channels Upper Band (20)",
+    "format": "float",
+    "historical": false
+  },
+  "MACD.macd": {
+    "label": "MACD Level (12, 26)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "MACD.signal": {
+    "label": "MACD Signal (12, 26)",
+    "format": "float",
+    "historical": false
+  },
+  "market_cap_calc": {
+    "label": "Market Capitalization",
+    "format": "missing",
+    "historical": false
+  },
+  "Mom": {
+    "label": "Momentum (10)",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "Perf.1M": {
+    "label": "Monthly Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "Recommend.MA": {
+    "label": "Moving Averages Rating",
+    "format": "rating",
+    "historical": false
+  },
+  "ADX-DI": {
+    "label": "Negative Directional Indicator (14)",
+    "format": "round",
+    "historical": true
+  },
+  "open": {
+    "label": "Open",
+    "format": "float",
+    "historical": false
+  },
+  "Recommend.Other": {
+    "label": "Oscillators Rating",
+    "format": "rating",
+    "historical": false
+  },
+  "P.SAR": {
+    "label": "Parabolic SAR",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "candlestick": {
+    "label": "Pattern",
+    "format": "missing",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.Middle": {
+    "label": "Pivot Camarilla P",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.R1": {
+    "label": "Pivot Camarilla R1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.R2": {
+    "label": "Pivot Camarilla R2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.R3": {
+    "label": "Pivot Camarilla R3",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.S1": {
+    "label": "Pivot Camarilla S1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.S2": {
+    "label": "Pivot Camarilla S2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Camarilla.S3": {
+    "label": "Pivot Camarilla S3",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Classic.Middle": {
+    "label": "Pivot Classic P",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.R1": {
+    "label": "Pivot Classic R1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.R2": {
+    "label": "Pivot Classic R2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.R3": {
+    "label": "Pivot Classic R3",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.S1": {
+    "label": "Pivot Classic S1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.S2": {
+    "label": "Pivot Classic S2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Classic.S3": {
+    "label": "Pivot Classic S3",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Demark.Middle": {
+    "label": "Pivot DM P",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Demark.R1": {
+    "label": "Pivot DM R1",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Demark.S1": {
+    "label": "Pivot DM S1",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.Middle": {
+    "label": "Pivot Fibonacci P",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.R1": {
+    "label": "Pivot Fibonacci R1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.R2": {
+    "label": "Pivot Fibonacci R2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.R3": {
+    "label": "Pivot Fibonacci R3",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.S1": {
+    "label": "Pivot Fibonacci S1",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.S2": {
+    "label": "Pivot Fibonacci S2",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Fibonacci.S3": {
+    "label": "Pivot Fibonacci S3",
+    "format": "float",
+    "historical": false
+  },
+  "Pivot.M.Woodie.Middle": {
+    "label": "Pivot Woodie P",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.R1": {
+    "label": "Pivot Woodie R1",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.R2": {
+    "label": "Pivot Woodie R2",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.R3": {
+    "label": "Pivot Woodie R3",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.S1": {
+    "label": "Pivot Woodie S1",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.S2": {
+    "label": "Pivot Woodie S2",
+    "format": "round",
+    "historical": false
+  },
+  "Pivot.M.Woodie.S3": {
+    "label": "Pivot Woodie S3",
+    "format": "round",
+    "historical": false
+  },
+  "ADX+DI": {
+    "label": "Positive Directional Indicator (14)",
+    "format": "round",
+    "historical": true
+  },
+  "ROC": {
+    "label": "Rate Of Change (9)",
+    "format": "round",
+    "historical": false
+  },
+  "RSI7": {
+    "label": "Relative Strength Index (7)",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "RSI": {
+    "label": "Relative Strength Index (14)",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "relative_volume_10d_calc": {
+    "label": "Relative Volume",
+    "format": "round",
+    "historical": false
+  },
+  "relative_volume_intraday.5": {
+    "label": "Relative Volume at Time",
+    "format": "round",
+    "historical": false
+  },
+  "SMA5": {
+    "label": "Simple Moving Average (5)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA10": {
+    "label": "Simple Moving Average (10)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA20": {
+    "label": "Simple Moving Average (20)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA30": {
+    "label": "Simple Moving Average (30)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA50": {
+    "label": "Simple Moving Average (50)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA100": {
+    "label": "Simple Moving Average (100)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "SMA200": {
+    "label": "Simple Moving Average (200)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "Stoch.D": {
+    "label": "Stochastic %D (14, 3, 3)",
+    "format": "round",
+    "historical": true
+  },
+  "Stoch.K": {
+    "label": "Stochastic %K (14, 3, 3)",
+    "format": "computed_recommendation",
+    "historical": true
+  },
+  "Stoch.RSI.K": {
+    "label": "Stochastic RSI Fast (3, 3, 14, 14)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "Stoch.RSI.D": {
+    "label": "Stochastic RSI Slow (3, 3, 14, 14)",
+    "format": "round",
+    "historical": false
+  },
+  "total_shares_diluted": {
+    "label": "Total Coins",
+    "format": "missing",
+    "historical": false
+  },
+  "total_value_traded": {
+    "label": "Traded Volume",
+    "format": "missing",
+    "historical": false
+  },
+  "UO": {
+    "label": "Ultimate Oscillator (7, 14, 28)",
+    "format": "recommendation",
+    "historical": false
+  },
+  "Volatility.D": {
+    "label": "Volatility",
+    "format": "percent",
+    "historical": false
+  },
+  "Volatility.M": {
+    "label": "Volatility Month",
+    "format": "percent",
+    "historical": false
+  },
+  "Volatility.W": {
+    "label": "Volatility Week",
+    "format": "percent",
+    "historical": false
+  },
+  "VWAP": {
+    "label": "Volume Weighted Average Price",
+    "format": "float",
+    "historical": false
+  },
+  "VWMA": {
+    "label": "Volume Weighted Moving Average (20)",
+    "format": "recommendation",
+    "historical": false
+  },
+  "Perf.W": {
+    "label": "Weekly Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "W.R": {
+    "label": "Williams Percent Range (14)",
+    "format": "computed_recommendation",
+    "historical": false
+  },
+  "Perf.Y": {
+    "label": "Yearly Performance",
+    "format": "percent",
+    "historical": false
+  },
+  "Perf.YTD": {
+    "label": "YTD Performance",
+    "format": "percent",
+    "historical": false
+  }
+}

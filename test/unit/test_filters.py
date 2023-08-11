@@ -1,25 +1,24 @@
 import unittest
 
-from tvscreener import StockScreener, Type, ExtraFilter, SymbolType, FilterOperator, SubMarket, StocksMarket, \
-    ForexScreener, StockField, ForexField
-from tvscreener.filter import Country, Exchange, Rating, Region
+from tvscreener import StockScreener, ExtraFilter, FilterOperator, ForexScreener, StockField, ForexField
+from tvscreener.field import Market, Country, Exchange, Rating, SymbolType, Type, SubMarket, Region
 
 
 class TestStockFilters(unittest.TestCase):
     def test_set_markets(self):
         ss = StockScreener()
-        ss.set_markets(StocksMarket.JAPAN, StocksMarket.FRANCE)
-        self.assertEqual([StocksMarket.JAPAN, StocksMarket.FRANCE], ss.markets)
+        ss.set_markets(Market.JAPAN, Market.FRANCE)
+        self.assertEqual([Market.JAPAN, Market.FRANCE], ss.markets)
 
     def test_set_markets_unique(self):
         ss = StockScreener()
-        ss.set_markets(StocksMarket.JAPAN)
-        self.assertEqual([StocksMarket.JAPAN], ss.markets)
+        ss.set_markets(Market.JAPAN)
+        self.assertEqual([Market.JAPAN], ss.markets)
 
     def test_set_markets_all(self):
         ss = StockScreener()
-        ss.set_markets(StocksMarket.ALL)
-        self.assertEqual([m for m in StocksMarket], ss.markets)
+        ss.set_markets(Market.ALL)
+        self.assertEqual([m for m in Market], ss.markets)
 
     def test_stock_additional_subtypes(self):
         ss = StockScreener()
@@ -226,10 +225,10 @@ class TestStockFilters(unittest.TestCase):
         self.assertEqual(Exchange.NYSE, exchange.values[1])
 
     def test_stockmarket_names(self):
-        self.assertIn("GREECE", StocksMarket.names())
+        self.assertIn("GREECE", Market.names())
 
     def test_stockmarket_values(self):
-        self.assertIn("venezuela", StocksMarket.values())
+        self.assertIn("venezuela", Market.values())
 
     def test_rating(self):
         self.assertIn(0.63, Rating.STRONG_BUY)

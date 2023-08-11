@@ -1,0 +1,11 @@
+{
+  "main": [
+    "logoid",
+    "name",
+    "description",
+    "type",
+    "subtype",
+    "currency",
+    "fundamental_currency_code"
+  ]
+}

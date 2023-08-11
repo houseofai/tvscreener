@@ -1,17 +1,22 @@
 import datetime
-import json
 import re
 import time
 
 import jinja2
+from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from tqdm import tqdm
 
-template = """
+import data
+
+xpath_column_setup = "/html/body/div[4]/div/div[2]/div[11]"
+xpath_filters = "/html/body/div[4]/div/div[2]/div[11]"
+
+template_field = """
 # ----------------------
 # Generated file
 # {{ now() }}
@@ -21,6 +26,19 @@ from tvscreener.field import Field
 
 class {{ name }}Field(Field):{% for key, v in enum_values.items() %}
     {{ key }} = '{{ v.label }}', '{{ v.field_name }}', '{{ v.format }}', {{ v.interval }}, {{ v.historical }}{% endfor %}
+    
+"""
+template_filters = """
+# ----------------------
+# Generated file
+# {{ now() }}
+# ----------------------
+from enum import Enum
+
+
+class {{ name }}(Enum):{% for key, v in enum_values.items() %}
+    {{ key }} = '{{ v }}'{% endfor %}
+    
 """
 
 computed_reco_fields = ['ADX',
@@ -77,6 +95,10 @@ def is_recommendation(field_value):
     return field_value.endswith(' N') or field_value.endswith(' S') or field_value.endswith(' B')
 
 
+def click_on(driver, xpath):
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
+
+
 def get_format(technical_label, field_value):
     field_type_ = None
     if "USD" in field_value:
@@ -114,7 +136,7 @@ def get_format(technical_label, field_value):
     return field_type_
 
 
-def scrap_columns(url_):
+def _start_window(url_):
     # proxy = Proxy()
     # proxy.setHttpProxy("https://scanner.tradingview.com/:8080")
     driver = webdriver.Firefox()  # proxy=proxy)
@@ -132,14 +154,74 @@ def scrap_columns(url_):
     driver.switch_to.frame(frame)
     # Close the Google popup
     google_closebtn_xpath = '//*[@id="close"]'
-    WebDriverWait(driver, 1000000).until(EC.element_to_be_clickable((By.XPATH, google_closebtn_xpath))).click()
+    click_on(driver, google_closebtn_xpath)
 
     driver.switch_to.default_content()
     time.sleep(1)
+    return driver
 
-    # Open the filter popup
-    filter_popup_xpath = "/html/body/div[4]/div/div[3]/div/div[1]"
-    WebDriverWait(driver, 1000000).until(EC.element_to_be_clickable((By.XPATH, filter_popup_xpath))).click()
+
+def get_xpath_filter_field(i):
+    return f"/html/body/div[10]/div/div/div/div[3]/div[1]/div/div/div[{i}]/div[2]/div/span"
+
+
+def get_xpath_field_name(i):
+    return f"/html/body/div[10]/div/div/div/div[3]/div[1]/div/div/div[{i}]/div[1]"
+
+
+def get_xpath_filter_value(i):
+    return f"/html/body/div[10]/div/div/div/div[4]/div/div[1]/div[{i}]/label/span"
+
+
+def get_field_values(driver):
+    fields = driver.find_element_by_xpath("/html/body/div[10]/div/div/div/div[4]/div/div[1]")
+    innerHTML = fields.get_attribute('innerHTML')
+
+    soup = BeautifulSoup(innerHTML, "html.parser")
+    # get all the spans
+    spans = soup.find_all("span", class_="tv-control-checkbox__label")
+    fields_values = [span.text for span in spans]
+    return fields_values
+
+
+def scrap_field_values(url_):
+    driver = _start_window(url_)
+    click_on(driver, xpath_filters)
+    reset_all = "/html/body/div[10]/div/div/div/div[2]/div"
+    click_on(driver, reset_all)
+
+    fields = {}
+    for i in range(1, 10000):
+        xpath_field_name = get_xpath_field_name(i)
+        print("Search field on xpath: ", xpath_field_name, "...")
+        try:
+            field_name = driver.find_element_by_xpath(xpath_field_name).text
+        except NoSuchElementException as e:
+            break
+
+        if field_name is None or field_name == "":
+            break
+
+        xpath_field = get_xpath_filter_field(i)
+
+        try:
+            click_on(driver, xpath_field)
+            fields_values = get_field_values(driver)
+            fields[field_name] = fields_values
+        except TimeoutException:
+            print("TimeoutException on field: ", field_name)
+            continue
+        except NoSuchElementException:
+            print("NoSuchElementException on field: ", field_name)
+            continue
+
+    driver.quit()
+    return fields
+
+
+def scrap_columns(url_):
+    driver = _start_window(url_)
+    click_on(driver, xpath_column_setup)
 
     fields_attribute = {}
     # Check all the columns
@@ -204,7 +286,7 @@ def format_field(field: str):
     elif field[0].isdigit():
         field = f'{field[1:]}_{field[0]}'
     # Remove
-    field = remove(field, ['(', ')', ',', '/', '-'])
+    field = remove(field, ['(', ')', ',', '/', '-', ':'])
     field = field.strip()
     # Replace
     field = (field.replace(' ', '_')
@@ -252,24 +334,31 @@ def set_intervals(columns):
 
 def fill_template(name, columns):
     # Render the template
-    template_code = jinja2.Template(template)
+    template_code = jinja2.Template(template_field)
     template_code.globals['now'] = datetime.datetime.utcnow
     return template_code.render(name=name, enum_values=columns)
 
 
+def fill_filter_template(classname, columns):
+    # Render the template
+    template_code = jinja2.Template(template_filters)
+    template_code.globals['now'] = datetime.datetime.utcnow
+    return template_code.render(name=classname, enum_values=columns)
+
+
 def load_intervals():
-    with open('time_intervals.json') as f:
-        return json.load(f)['columns']
+    with open('data/time_intervals.json') as f:
+        return data.load(f)['columns']
 
 
 def load_patterns():
-    with open('patterns.json') as f:
-        return json.load(f)['patterns']
+    with open('data/patterns.json') as f:
+        return data.load(f)['patterns']
 
 
 def load_main():
-    with open('main.json') as f:
-        return json.load(f)['main']
+    with open('data/main.json') as f:
+        return data.load(f)['main']
 
 
 def add_patterns_columns(columns):
@@ -300,6 +389,14 @@ def add_main_columns(columns):
     return columns
 
 
+def generate_filter_columns(values):
+    newdic = {}
+    for value in values:
+        if value != 'Any':
+            newdic[format_field(value)] = value
+    return newdic
+
+
 def generate_columns(selenium_columns):
     selenium_columns = add_main_columns(selenium_columns)
     selenium_columns = add_patterns_columns(selenium_columns)
@@ -309,5 +406,5 @@ def generate_columns(selenium_columns):
 
 
 def write(filename, generated_template):
-    with open(f'../tvscreener/field/{filename}.py', 'w') as fp:
+    with open(f'code/{filename}.py.generated', 'w') as fp:
         fp.write(generated_template)

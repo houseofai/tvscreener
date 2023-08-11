@@ -1,0 +1,13 @@
+
+# ----------------------
+# Generated file
+# 2023-08-11 07:05:13.153890
+# ----------------------
+from enum import Enum
+
+
+class Submarket(Enum):
+    OTCQB = 'OTCQB'
+    OTCQX = 'OTCQX'
+    PINK = 'PINK'
+    

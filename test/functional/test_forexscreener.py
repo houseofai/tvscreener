@@ -1,6 +1,7 @@
 import unittest
 
-from tvscreener import ForexScreener, TimeInterval, Region, ForexField, FilterOperator
+from tvscreener import ForexScreener, TimeInterval, ForexField, FilterOperator
+from tvscreener.field import Region
 
 
 class TestForexScreener(unittest.TestCase):

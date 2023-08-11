@@ -1,0 +1,21 @@
+
+# ----------------------
+# Generated file
+# 2023-08-11 07:05:13.152605
+# ----------------------
+from enum import Enum
+
+
+class SymbolType(Enum):
+    CLOSEDEND_FUND = 'Closed-end fund'
+    COMMON_STOCK = 'Common Stock'
+    DEPOSITARY_RECEIPT = 'Depositary Receipt'
+    ETF = 'ETF'
+    ETN = 'ETN'
+    MUTUAL_FUND = 'Mutual fund'
+    PREFERRED_STOCK = 'Preferred Stock'
+    REIT = 'REIT'
+    STRUCTURED = 'Structured'
+    TRUST_FUND = 'Trust fund'
+    UIT = 'UIT'
+    

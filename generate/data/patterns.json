@@ -1,0 +1,31 @@
+{
+  "patterns": [
+    "Candle.AbandonedBaby.Bearish",
+    "Candle.AbandonedBaby.Bullish",
+    "Candle.Engulfing.Bearish",
+    "Candle.Harami.Bearish",
+    "Candle.Engulfing.Bullish",
+    "Candle.Harami.Bullish",
+    "Candle.Doji",
+    "Candle.Doji.Dragonfly",
+    "Candle.EveningStar",
+    "Candle.Doji.Gravestone",
+    "Candle.Hammer",
+    "Candle.HangingMan",
+    "Candle.InvertedHammer",
+    "Candle.Kicking.Bearish",
+    "Candle.Kicking.Bullish",
+    "Candle.LongShadow.Lower",
+    "Candle.LongShadow.Upper",
+    "Candle.Marubozu.Black",
+    "Candle.Marubozu.White",
+    "Candle.MorningStar",
+    "Candle.ShootingStar",
+    "Candle.SpinningTop.Black",
+    "Candle.SpinningTop.White",
+    "Candle.3BlackCrows",
+    "Candle.3WhiteSoldiers",
+    "Candle.TriStar.Bearish",
+    "Candle.TriStar.Bullish"
+  ]
+}

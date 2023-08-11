@@ -4,16 +4,15 @@ from enum import Enum
 import pandas as pd
 import requests
 
-from tvscreener.field import TimeInterval, Field
+from tvscreener.field import TimeInterval, Field, Market, Type, SymbolType
 from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
-from tvscreener.filter import FilterOperator, Filter, Rating, StocksMarket, ExtraFilter, SymbolType, Type, SubMarket, \
-    Country, Exchange, Region
+from tvscreener.filter import FilterOperator, Filter, ExtraFilter
 from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
     MalformedRequestException
 
-default_market = StocksMarket.AMERICA
+default_market = Market.AMERICA
 default_min_range = 0
 default_max_range = 150
 default_sort_stocks = StockField.MARKET_CAPITALIZATION
@@ -214,14 +213,14 @@ class StockScreener(Screener):
         for symbol_type in symbol_types:
             self.add_filter(StockField.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy())
 
-    def set_markets(self, *markets: StocksMarket):
+    def set_markets(self, *markets: Market):
         """
         Set the markets to be scanned
         :param markets: list of markets
         :return: None
         """
-        if StocksMarket.ALL in markets:
-            self.markets = [market for market in StocksMarket]
+        if Market.ALL in markets:
+            self.markets = [market for market in Market]
         else:
             self.markets = [market for market in markets]
 

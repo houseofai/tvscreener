@@ -1,8 +1,3 @@
-
-# ----------------------
-# Generated file
-# 2023-08-08 09:09:31.216188
-# ----------------------
 from tvscreener.field import Field
 
 

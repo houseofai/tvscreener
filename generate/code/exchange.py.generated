@@ -1,0 +1,14 @@
+
+# ----------------------
+# Generated file
+# 2023-08-11 07:05:13.153328
+# ----------------------
+from enum import Enum
+
+
+class Exchange(Enum):
+    NYSE_ARCA = 'NYSE ARCA'
+    NASDAQ = 'NASDAQ'
+    NYSE = 'NYSE'
+    OTC = 'OTC'
+    
