@@ -39,6 +39,11 @@ class Field(Enum):
             return add_rec_to_label(self.label)
         return None
 
+    def get_rec_field(self):
+        if self.has_recommendation():
+            return add_rec(self.field_name)
+        return None
+
     @classmethod
     def get_by_label(cls, specific_fields, label):
         for specific_field in specific_fields:

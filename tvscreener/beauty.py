@@ -1,4 +1,10 @@
-from tvscreener import Field, millify, get_recommendation, Rating
+from typing import Type
+
+import numpy as np
+import pandas as pd
+
+from tvscreener import Field, millify, get_recommendation, ScreenerDataFrame, StockField
+from tvscreener.field import Rating
 
 
 def beautify(df, specific_fields):
@@ -6,76 +12,88 @@ def beautify(df, specific_fields):
     return df
 
 
+def _percent_colors(row):
+    return 'color:red;' if row.startswith("-") < 0 else 'color:green;'
+
+
 class Beautify:
-    def __init__(self, df, specific_fields: Field):
-        self.df = df.copy()
+    def __init__(self, sdf: ScreenerDataFrame, specific_fields: Type[Field]):
+        sdf.set_technical_columns(only=True)
+        self.df = sdf.copy()
+        self.df_beauty = self.df.style
 
-        for column in self.df.columns:
-            # Find the enum with the column name
-            specific_field = specific_fields.get_by_label(specific_fields, column)
-            if specific_field is not None and specific_field.format is not None:
-                # self._copy_column(column)
-                # fn = self.fn_mappings.get(format_)
-                self._format_column(specific_field, column)
+        for field in specific_fields:
+            if field.field_name in self.df.columns:
+                self._format_column(field)
 
-    def _format_column(self, specific_field, column):
-        if specific_field.format is 'bool':
-            self._to_bool(column)
-        elif specific_field.format is 'rating':
-            self._rating(column)
-        elif specific_field.format is 'round':
-            self._round(column)
-        elif specific_field.format is 'percent':
-            self._percent(column)
-        elif specific_field.has_recommendation():
-            self._recommendation(column, specific_field)
-        elif specific_field.format is 'computed_recommendation':
+        # for column in self.df.columns:
+        #    # Find the enum with the column name
+        #    specific_field = specific_fields.get_by_label(specific_fields, column)
+        #    if specific_field is not None and specific_field.format is not None:
+        #        # self._copy_column(column)
+        #        # fn = self.fn_mappings.get(format_)
+        #        self._format_column(specific_field)
+
+    def _format_column(self, field):
+        fmt = field.format
+        if fmt == 'bool':
+            self._to_bool(field)
+        elif fmt == 'rating':
+            self._rating(field)
+        elif fmt == 'round':
+            self._round(field)
+        elif fmt == 'percent':
+            self._percent(field)
+        elif field.has_recommendation():
+            self._recommendation(field)
+        elif fmt == 'computed_recommendation':
             # TODO
             pass
-        elif specific_field.format is 'text':
+        elif field.format == 'text':
             # TODO
             pass
-        elif specific_field.format is 'date':
+        elif field.format == 'date':
             # TODO
             pass
-        elif specific_field.format is 'missing':
+        elif field.format == 'missing':
             # TODO
             pass
-        elif specific_field.format is 'currency':
+        elif field.format == 'currency':
             # TODO
             pass
-        elif specific_field.format is 'float':
+        elif field.format == 'float':
             # TODO
             pass
-        elif specific_field.format is 'number_group':
-            self._replace_nan(column)
-            self._number_group(column)
+        elif field.format == 'number_group':
+            self._replace_nan(field)
+            self._number_group(field)
         else:
-            print(f"Unknown format: {specific_field.format} for column: {column}")
+            print(f"Unknown format: {field.format} for column: {field}")
 
-    def _rating(self, column):
-        self.df[column] = self.df[column].apply(lambda x: Rating.find(x).label)
+    def _rating(self, field: Field):
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: Rating.find(x).label)
 
-    def _recommendation(self, column, specific_field):
-        self.df[column] = self.df.apply(
-            lambda x: f"{x[column]} - {get_recommendation(x[specific_field.get_rec_label()])}", axis=1)
+    def _recommendation(self, field):
+        self.df[field.field_name] = self.df.apply(
+            lambda x: f"{x[field.field_name]} - {get_recommendation(x[field.get_rec_field()])}", axis=1)
 
-    def _number_group(self, column):
-        self.df[column] = self.df[column].apply(lambda x: millify(x))
+    def _number_group(self, field):
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: millify(x))
 
-    def _percent(self, column):
-        self.df[column] = self.df[column].apply(lambda x: f"{x:.2f}%" if x is not None else None)
+    def _percent(self, field):
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: f"{x:.2f}%" if not np.isnan(x) else "--")
+        self.df_beauty = self.df_beauty.applymap(_percent_colors, subset=pd.IndexSlice[:, [field.field_name]])
 
-    def _round(self, column):
-        self.df[column] = self.df[column].apply(lambda x: round(x, 2) if x is not None else None)
+    def _round(self, field):
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: round(x, 2) if not np.isnan(x) else "--")
 
-    def _copy_column(self, column):
-        raw_name = column + " raw"
-        self.df[raw_name] = self.df[column]
+    def _copy_column(self, field):
+        raw_name = field.field_name + " raw"
+        self.df[raw_name] = self.df[field.field_name]
 
-    def _replace_nan(self, column):
-        self.df[column] = self.df[column].fillna(0)
+    def _replace_nan(self, field):
+        self.df[field.field_name] = self.df[field.field_name].fillna(0)
 
-    def _to_bool(self, column):
-        self.df[column] = self.df[column].apply(lambda x: True if x is 'true' else False)
-        self.df[column] = self.df[column].astype(bool)
+    def _to_bool(self, field):
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: True if x == 'true' else False)
+        self.df[field.field_name] = self.df[field.field_name].astype(bool)
