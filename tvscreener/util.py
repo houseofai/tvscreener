@@ -91,7 +91,7 @@ def get_url(subtype):
     return f"https://scanner.tradingview.com/{subtype}/scan"
 
 
-millnames = ['', '', 'M', 'B', '']
+millnames = ['', 'K', 'M', 'B', '']
 
 
 def millify(n):

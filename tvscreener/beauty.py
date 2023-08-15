@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 
 from tvscreener import Field, millify, get_recommendation, ScreenerDataFrame, StockField
-from tvscreener.field import Rating
+from tvscreener.field import Rating, add_rec
+from tvscreener.ta import adx
 
 
 def beautify(df, specific_fields):
@@ -14,6 +15,15 @@ def beautify(df, specific_fields):
 
 def _percent_colors(row):
     return 'color:red;' if row.startswith("-") < 0 else 'color:green;'
+
+
+def _rating_colors(row):
+    if row.endwiths("B"):
+        return 'color:green;'
+    elif row.endwiths("S"):
+        return 'color:red;'
+    else:
+        return 'color:gray;'
 
 
 class Beautify:
@@ -48,7 +58,7 @@ class Beautify:
             self._recommendation(field)
         elif fmt == 'computed_recommendation':
             # TODO
-            pass
+            self._computed_recommendation(field)
         elif field.format == 'text':
             # TODO
             pass
@@ -77,6 +87,13 @@ class Beautify:
         self.df[field.field_name] = self.df.apply(
             lambda x: f"{x[field.field_name]} - {get_recommendation(x[field.get_rec_field()])}", axis=1)
 
+    def _computed_recommendation(self, field):
+        if field.field_name == "ADX":
+            # FIXME Column name can have update mode
+            self.df[field.field_name] = self.df.apply(
+                lambda x: f"{x['ADX']} - {adx(x['ADX'], x['ADX-DI'], x['ADX+DI'], x['ADX-DI[1]'], x['ADX+DI[1]'])}", axis=1)
+            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
+
     def _number_group(self, field):
         self.df[field.field_name] = self.df[field.field_name].apply(lambda x: millify(x))
 
@@ -97,3 +114,5 @@ class Beautify:
     def _to_bool(self, field):
         self.df[field.field_name] = self.df[field.field_name].apply(lambda x: True if x == 'true' else False)
         self.df[field.field_name] = self.df[field.field_name].astype(bool)
+
+
