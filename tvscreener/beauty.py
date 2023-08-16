@@ -93,7 +93,7 @@ class Beautify:
             pass
         elif field.format == 'currency':
             self._round(field)
-            #self.df[field.field_name] = self.df[field.field_name].apply(lambda x: x if not np.isnan(x) else "--")
+            # self.df[field.field_name] = self.df[field.field_name].apply(lambda x: x if not np.isnan(x) else "--")
             self._number_group(field)
             self._currency(field)
         elif field.format == 'float':
