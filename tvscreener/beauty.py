@@ -3,8 +3,8 @@ from typing import Type
 import numpy as np
 import pandas as pd
 
-from tvscreener import Field, millify, get_recommendation, ScreenerDataFrame, StockField
-from tvscreener.field import Rating, add_rec
+from tvscreener import Field, millify, get_recommendation, ScreenerDataFrame
+from tvscreener.field import Rating
 from tvscreener.ta import adx
 
 
@@ -17,10 +17,10 @@ def _percent_colors(row):
     return 'color:red;' if row.startswith("-") < 0 else 'color:green;'
 
 
-def _rating_colors(row):
-    if row.endwiths("B"):
+def _rating_colors(row: str):
+    if row.endswith("B"):
         return 'color:green;'
-    elif row.endwiths("S"):
+    elif row.endswith("S"):
         return 'color:red;'
     else:
         return 'color:gray;'
@@ -91,7 +91,7 @@ class Beautify:
         if field.field_name == "ADX":
             # FIXME Column name can have update mode
             self.df[field.field_name] = self.df.apply(
-                lambda x: f"{x['ADX']} - {adx(x['ADX'], x['ADX-DI'], x['ADX+DI'], x['ADX-DI[1]'], x['ADX+DI[1]'])}", axis=1)
+                lambda x: f"{x['ADX']} {adx(x['ADX'], x['ADX-DI'], x['ADX+DI'], x['ADX-DI[1]'], x['ADX+DI[1]'])}", axis=1)
             self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
 
     def _number_group(self, field):

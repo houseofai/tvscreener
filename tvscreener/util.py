@@ -1,7 +1,7 @@
 import math
 from typing import Type
 
-from tvscreener import Field, TimeInterval
+from tvscreener import Field, TimeInterval, StockField
 from tvscreener.field import add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
 
 
@@ -62,6 +62,9 @@ def get_columns_to_request(fields_: Type[Field], time_interval: TimeInterval):
     # Add the historical columns
     hist_columns = {format_historical_field(field, time_interval): add_historical_to_label(field.label)
                     for field in fields_ if field.historical}
+    # FIXME: Awesome Oscillator has two historical fields
+    if "AO" in columns.keys():
+        hist_columns[format_historical_field(StockField.AWESOME_OSCILLATOR, time_interval, 2)] = add_historical_to_label("AO", 2)
 
     # Merge the dicts
     columns = {**columns, **rec_columns, **hist_columns}
