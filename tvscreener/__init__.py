@@ -9,7 +9,7 @@ from tvscreener.field.crypto import CryptoField
 from tvscreener.field.forex import ForexField
 from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator, Filter, ExtraFilter
-from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, get_recommendation, \
+from tvscreener.util import get_columns_to_request, is_status_code_ok, get_url, millify, \
     MalformedRequestException
 
 default_market = Market.AMERICA
@@ -54,13 +54,6 @@ class Screener:
         self.range = None
         self.set_range()
         self.add_option("lang", "en")
-
-    # def add_prebuilt_filter(self, filter_: Filter):
-    #    self.filters.append(filter_.to_dict())
-
-    # def add_filter(self, filter_: Filter, operation: FilterOperator = None, values=None):
-    #    filter_val = {"left": filter_, "operation": operation.value, "right": values}
-    #    self.filters.append(filter_val)
 
     def search(self, value: str):
         self.add_filter(ExtraFilter.SEARCH, FilterOperator.MATCH, value)

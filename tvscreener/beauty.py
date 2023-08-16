@@ -3,9 +3,15 @@ from typing import Type
 import numpy as np
 import pandas as pd
 
-from tvscreener import Field, millify, get_recommendation, ScreenerDataFrame
+from tvscreener import Field, millify, ScreenerDataFrame, StockField
 from tvscreener.field import Rating
-from tvscreener.ta import adx
+import tvscreener.ta as ta
+
+buy_char = "&#x2303; B"
+sell_char = "&#x2304; S"
+neutral_char = "- N"
+red = "color:rgb(255, 23, 62);"
+green = "color:rgb(0, 169, 127);"
 
 
 def beautify(df, specific_fields):
@@ -13,17 +19,35 @@ def beautify(df, specific_fields):
     return df
 
 
+def _get_recommendation(rating):
+    if rating < 0:
+        return Rating.SELL
+    elif rating == 0:
+        return Rating.NEUTRAL
+    elif rating > 0:
+        return Rating.BUY
+
+
 def _percent_colors(row):
-    return 'color:red;' if row.startswith("-") < 0 else 'color:green;'
+    return red if row.startswith("-") else green  # Green
 
 
-def _rating_colors(row: str):
-    if row.endswith("B"):
-        return 'color:green;'
-    elif row.endswith("S"):
-        return 'color:red;'
+def _rating_colors(v):
+    if v.endswith(buy_char):
+        return 'color:rgb(41, 98, 255);'  # Blue
+    elif v.endswith(sell_char):
+        return 'color:rgb(255, 74, 104);'  # Red
     else:
-        return 'color:gray;'
+        return 'color:rgb(157, 178, 189);'  # Gray
+
+
+def _rating_letter(rating: Rating):
+    if rating == Rating.BUY:
+        return buy_char
+    elif rating == Rating.SELL:
+        return sell_char
+    else:
+        return neutral_char
 
 
 class Beautify:
@@ -57,7 +81,6 @@ class Beautify:
         elif field.has_recommendation():
             self._recommendation(field)
         elif fmt == 'computed_recommendation':
-            # TODO
             self._computed_recommendation(field)
         elif field.format == 'text':
             # TODO
@@ -69,8 +92,10 @@ class Beautify:
             # TODO
             pass
         elif field.format == 'currency':
-            # TODO
-            pass
+            self._round(field)
+            #self.df[field.field_name] = self.df[field.field_name].apply(lambda x: x if not np.isnan(x) else "--")
+            self._number_group(field)
+            self._currency(field)
         elif field.format == 'float':
             # TODO
             pass
@@ -85,24 +110,24 @@ class Beautify:
 
     def _recommendation(self, field):
         self.df[field.field_name] = self.df.apply(
-            lambda x: f"{x[field.field_name]} - {get_recommendation(x[field.get_rec_field()])}", axis=1)
+            lambda x: f"{x[field.field_name]} {_rating_letter(_get_recommendation(x[field.get_rec_field()]))}", axis=1)
+        self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
 
-    def _computed_recommendation(self, field):
-        if field.field_name == "ADX":
-            # FIXME Column name can have update mode
-            self.df[field.field_name] = self.df.apply(
-                lambda x: f"{x['ADX']} {adx(x['ADX'], x['ADX-DI'], x['ADX+DI'], x['ADX-DI[1]'], x['ADX+DI[1]'])}", axis=1)
-            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
+    def _currency(self, field):
+        self.df[field.field_name] = self.df.apply(
+            lambda x: f"{x[field.field_name]} {x[StockField.CURRENCY.field_name]}" if x[field.field_name] != "--" else
+            x[field.field_name], axis=1)
 
     def _number_group(self, field):
-        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: millify(x))
+        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: millify(x) if x != "--" else x)
 
     def _percent(self, field):
         self.df[field.field_name] = self.df[field.field_name].apply(lambda x: f"{x:.2f}%" if not np.isnan(x) else "--")
         self.df_beauty = self.df_beauty.applymap(_percent_colors, subset=pd.IndexSlice[:, [field.field_name]])
 
     def _round(self, field):
-        self.df[field.field_name] = self.df[field.field_name].apply(lambda x: round(x, 2) if not np.isnan(x) else "--")
+        self.df[field.field_name] = self.df[field.field_name].apply(
+            lambda x: round(x, 2) if not np.isnan(x) else "--")
 
     def _copy_column(self, field):
         raw_name = field.field_name + " raw"
@@ -115,4 +140,26 @@ class Beautify:
         self.df[field.field_name] = self.df[field.field_name].apply(lambda x: True if x == 'true' else False)
         self.df[field.field_name] = self.df[field.field_name].astype(bool)
 
-
+    def _computed_recommendation(self, field):
+        # FIXME Column name can have update mode
+        if field.field_name == "ADX":
+            self.df[field.field_name] = self.df.apply(
+                lambda
+                    x: f"{x[field.field_name]} {_rating_letter(ta.adx(x['ADX'], x['ADX-DI'], x['ADX+DI'], x['ADX-DI[1]'], x['ADX+DI[1]']))}",
+                axis=1)
+            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
+        elif field.field_name == "AO":
+            self.df[field.field_name] = self.df.apply(
+                lambda x: f"{x[field.field_name]} {_rating_letter(ta.ao(x['AO'], x['AO[1]'], x['AO[2]']))}",
+                axis=1)
+            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
+        elif field.field_name == "BB.lower":
+            self.df[field.field_name] = self.df.apply(
+                lambda x: f"{x[field.field_name]} {_rating_letter(ta.bb_lower(x[field.field_name], x['close']))}",
+                axis=1)
+            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])
+        elif field.field_name == "BB.upper":
+            self.df[field.field_name] = self.df.apply(
+                lambda x: f"{x[field.field_name]} {_rating_letter(ta.bb_upper(x[field.field_name], x['close']))}",
+                axis=1)
+            self.df_beauty = self.df_beauty.applymap(_rating_colors, subset=pd.IndexSlice[:, [field.field_name]])

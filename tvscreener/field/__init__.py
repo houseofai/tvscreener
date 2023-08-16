@@ -11,7 +11,7 @@ def add_historical(field_name, historical=1):
 
 
 def add_historical_to_label(field_name, historical=1):
-    return f"Prev. {field_name}"
+    return f"Prev. {field_name} {historical}"
 
 
 def add_rec(field_name):
