@@ -1,4 +1,4 @@
-python~=3.11
+python~=3
 pandas
 requests~=2.31
 jinja2
