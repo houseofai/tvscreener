@@ -1,8 +1,7 @@
 import math
 from typing import Type
 
-from tvscreener import Field, TimeInterval
-from tvscreener.field import add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
+from tvscreener.field import Field, TimeInterval, add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
 
 
 

@@ -1,4 +1,5 @@
-from tvscreener import get_url, ForexField
+from tvscreener.field.forex import ForexField
+from tvscreener.util import get_url
 from tvscreener.core.base import Screener, default_sort_forex
 
 

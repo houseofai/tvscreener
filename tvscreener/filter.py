@@ -1,6 +1,5 @@
 from enum import Enum
-
-from tvscreener import Field
+from tvscreener.field import Field
 
 
 class FilterOperator(Enum):
