@@ -1,10 +1,7 @@
-python~=3
 pandas
-requests~=2.31
+requests
 jinja2
-selenium
 tqdm
 setuptools
 pytest
 pytest-cov
-notebook==7.0.2
