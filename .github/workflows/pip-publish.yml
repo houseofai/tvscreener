@@ -26,6 +26,11 @@ jobs:
       - name: Build package
         run: python -m build
 
+      - name: Test built package
+        run: |
+          pip install dist/*.whl
+          python -c "import tvscreener; print('Package imported successfully!')"
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
