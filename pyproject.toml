@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tvscreener"
+version = "0.0.12"
+description = "TradingView Screener API"
+readme = "README.md"
+authors = [
+    { name = "House of AI" }
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["finance", "tradingview", "technical-analysis"]
+dependencies = [
+    "pandas",
+    "requests>=2.27.1"
+]
+urls = {"Homepage" = "https://github.com/houseofai/tvscreener"}
