@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     { name = "House of AI" }
 ]
-license = { file = "LICENSE" }
+license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 keywords = ["finance", "tradingview", "technical-analysis"]
 dependencies = [
@@ -18,3 +18,12 @@ dependencies = [
     "requests>=2.27.1"
 ]
 urls = {"Homepage" = "https://github.com/houseofai/tvscreener"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+[tool.setuptools.packages.find]
+include = ["tvscreener*"]
+exclude = ["notebooks", "scripts", "tests"]

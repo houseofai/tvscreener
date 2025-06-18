@@ -10,5 +10,5 @@ from .util import *
 __all__ = [
     "Screener", "ScreenerDataFrame",
     "StockScreener", "ForexScreener", "CryptoScreener",
-    "Field", "Filter", "Market", "Exchange", "Country", "Sector", "Industry",
+    "Field", "Filter", "Market", "Exchange", "Country", "Sector", "Industry", "TimeInterval",
 ]
