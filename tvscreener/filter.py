@@ -1,4 +1,5 @@
 from enum import Enum
+
 from tvscreener.field import Field
 
 

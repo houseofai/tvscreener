@@ -1,6 +1,6 @@
-from tvscreener.util import get_url
 from tvscreener.core.base import Screener, default_sort_crypto
 from tvscreener.field.crypto import CryptoField
+from tvscreener.util import get_url
 
 
 class CryptoScreener(Screener):

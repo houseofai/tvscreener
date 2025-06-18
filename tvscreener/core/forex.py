@@ -1,6 +1,6 @@
+from tvscreener.core.base import Screener, default_sort_forex
 from tvscreener.field.forex import ForexField
 from tvscreener.util import get_url
-from tvscreener.core.base import Screener, default_sort_forex
 
 
 class ForexScreener(Screener):

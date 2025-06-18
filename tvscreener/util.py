@@ -1,9 +1,8 @@
 import math
 from typing import Type
 
-from tvscreener.field import Field, TimeInterval, add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
-
-
+from tvscreener.field import Field, TimeInterval, add_historical, add_time_interval, add_rec, add_rec_to_label, \
+    add_historical_to_label
 
 
 def format_historical_field(field_, time_interval, historical=1):

@@ -1,8 +1,9 @@
 from tvscreener.core.base import Screener, default_market, default_sort_stocks
-from tvscreener.util import get_url
 from tvscreener.field import Market, Type, SymbolType
 from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator
+from tvscreener.util import get_url
+
 
 class StockScreener(Screener):
 

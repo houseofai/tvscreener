@@ -1,8 +1,7 @@
 import json
-from enum import Enum
-
 import pandas as pd
 import requests
+from enum import Enum
 
 from tvscreener.exceptions import MalformedRequestException
 from tvscreener.field import TimeInterval, Field, Market
@@ -124,6 +123,11 @@ class Screener:
         return payload
 
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
+        """
+        Get the screener data.
+        :param time_interval: The time interval for the data (default is ONE_DAY).
+        :param print_request: If True, prints the request URL and payload.
+        """
 
         # Build columns
         columns = get_columns_to_request(self.specific_fields, time_interval)
