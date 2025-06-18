@@ -1,4 +1,5 @@
-from tvscreener import Field, millify, get_recommendation, Rating
+from tvscreener import Field, millify, get_recommendation
+from tvscreener.field import Rating
 
 
 def beautify(df, specific_fields):
