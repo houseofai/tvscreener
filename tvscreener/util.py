@@ -5,13 +5,6 @@ from tvscreener import Field, TimeInterval
 from tvscreener.field import add_historical, add_time_interval, add_rec, add_rec_to_label, add_historical_to_label
 
 
-class MalformedRequestException(Exception):
-    def __init__(self, code, response_msg, url, payload):
-        message = f"Error: {code}: {response_msg}\n"
-        message += f"Request: {url}\n"
-        message += "Payload:\n"
-        message += payload
-        super().__init__(message)
 
 
 def format_historical_field(field_, time_interval, historical=1):
@@ -109,3 +102,5 @@ def get_recommendation(rating):
         return "N"
     elif rating > 0:
         return "B"
+    else:
+        raise ValueError(f"Invalid rating: {rating}. Rating should be a number.")
