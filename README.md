@@ -39,7 +39,7 @@ pip install tvscreener
 From pip + GitHub:
 
 ```sh
-$ pip install git+https://github.com/houseofai/tradingview-screener@main
+$ pip install git+https://github.com/houseofai/tvscreener.git
 ```
 
 ## Usage

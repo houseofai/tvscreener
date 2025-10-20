@@ -8,22 +8,45 @@ version = "0.0.13"
 description = "TradingView Screener API"
 readme = "README.md"
 authors = [
-    { name = "House of AI" }
+    { name = "House of AI", email = "info@houseofai.com" }
 ]
-license-files = [ "LICENSE" ]
+license = "MIT"
 requires-python = ">=3.10"
 keywords = ["finance", "tradingview", "technical-analysis"]
 dependencies = [
-    "pandas",
+    "pandas>=1.3.0",
     "requests>=2.27.1"
 ]
-urls = {"Homepage" = "https://github.com/houseofai/tvscreener"}
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+
+[project.urls]
+Homepage = "https://github.com/houseofai/tvscreener"
+Repository = "https://github.com/houseofai/tvscreener"
+Documentation = "https://github.com/houseofai/tvscreener"
+"Bug Tracker" = "https://github.com/houseofai/tvscreener/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "build>=1.0.0",
+    "twine>=4.0.0"
+]
+
 [tool.setuptools.packages.find]
 include = ["tvscreener*"]
 exclude = ["notebooks", "scripts", "tests"]
+
+[tool.setuptools.package-data]
+tvscreener = ["py.typed"]
