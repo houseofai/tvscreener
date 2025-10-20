@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tvscreener"
-version = "0.0.13"
+version = "0.0.14"
 description = "TradingView Screener API"
 readme = "README.md"
 authors = [
