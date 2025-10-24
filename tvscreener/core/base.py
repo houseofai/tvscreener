@@ -11,12 +11,22 @@ from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator, Filter, ExtraFilter
 from tvscreener.util import get_columns_to_request, is_status_code_ok
 
-default_market = Market.AMERICA
-default_min_range = 0
-default_max_range = 150
-default_sort_stocks = StockField.MARKET_CAPITALIZATION
-default_sort_crypto = CryptoField.VOLUME_24H_IN_USD
-default_sort_forex = ForexField.NAME
+# Configuration constants
+DEFAULT_MARKET = Market.AMERICA
+DEFAULT_MIN_RANGE = 0
+DEFAULT_MAX_RANGE = 150
+DEFAULT_SORT_STOCKS = StockField.MARKET_CAPITALIZATION
+DEFAULT_SORT_CRYPTO = CryptoField.VOLUME_24H_IN_USD
+DEFAULT_SORT_FOREX = ForexField.NAME
+REQUEST_TIMEOUT = 30  # seconds
+
+# Backward compatibility aliases
+default_market = DEFAULT_MARKET
+default_min_range = DEFAULT_MIN_RANGE
+default_max_range = DEFAULT_MAX_RANGE
+default_sort_stocks = DEFAULT_SORT_STOCKS
+default_sort_crypto = DEFAULT_SORT_CRYPTO
+default_sort_forex = DEFAULT_SORT_FOREX
 
 
 class ScreenerDataFrame(pd.DataFrame):
@@ -40,6 +50,7 @@ class ScreenerDataFrame(pd.DataFrame):
 
 
 class Screener:
+    """Base screener class for querying TradingView screeners."""
 
     def __init__(self):
         self.sort = None
@@ -124,25 +135,56 @@ class Screener:
 
     def get(self, time_interval=TimeInterval.ONE_DAY, print_request=False):
         """
-        Get the screener data.
-        :param time_interval: The time interval for the data (default is ONE_DAY).
-        :param print_request: If True, prints the request URL and payload.
-        """
+        Get the screener data from TradingView.
 
+        :param time_interval: The time interval for the data (default is ONE_DAY).
+        :param print_request: If True, prints the request URL and payload for debugging.
+        :return: ScreenerDataFrame containing the screener results
+        :raises MalformedRequestException: If the API request fails
+        :raises requests.RequestException: If there's a network error
+        """
         # Build columns
         columns = get_columns_to_request(self.specific_fields, time_interval)
 
         payload = self._build_payload(list(columns.keys()))
-        payload = json.dumps(payload, indent=4)
+        payload_json = json.dumps(payload, indent=4)
 
         if print_request:
             print(f"Request: {self.url}")
             print("Payload:")
-            print(payload)
+            print(payload_json)
 
-        response = requests.post(self.url, data=payload)
-        if is_status_code_ok(response):
-            data = [[d["s"]] + d["d"] for d in response.json()['data']]
-            return ScreenerDataFrame(data, columns)
-        else:
-            raise MalformedRequestException(response.status_code, response.text, self.url, payload)
+        try:
+            # Fixed: Add timeout to prevent hanging indefinitely
+            response = requests.post(
+                self.url,
+                data=payload_json,
+                timeout=REQUEST_TIMEOUT,
+                headers={'Content-Type': 'application/json'}
+            )
+
+            if is_status_code_ok(response):
+                data = [[d["s"]] + d["d"] for d in response.json()['data']]
+                return ScreenerDataFrame(data, columns)
+            else:
+                raise MalformedRequestException(
+                    response.status_code,
+                    response.text,
+                    self.url,
+                    payload_json
+                )
+
+        except requests.Timeout:
+            raise MalformedRequestException(
+                408,  # Request Timeout
+                f"Request timed out after {REQUEST_TIMEOUT} seconds",
+                self.url,
+                payload_json
+            )
+        except requests.RequestException as e:
+            raise MalformedRequestException(
+                0,  # Unknown status code
+                str(e),
+                self.url,
+                payload_json
+            )

@@ -4,16 +4,28 @@ from tvscreener.field.stock import StockField
 from tvscreener.filter import FilterOperator
 from tvscreener.util import get_url
 
+# Mapping from SymbolType to Type for efficient lookup
+SYMBOL_TYPE_TO_TYPE_MAP = {
+    SymbolType.COMMON_STOCK: Type.STOCK,
+    SymbolType.DEPOSITORY_RECEIPT: Type.DEPOSITORY_RECEIPT,
+    SymbolType.ETF: Type.FUND,
+    SymbolType.MUTUAL_FUND: Type.FUND,
+    SymbolType.REIT: Type.FUND,
+    SymbolType.PREFERRED_STOCK: Type.STOCK,
+    SymbolType.ETN: Type.STRUCTURED,
+    SymbolType.STRUCTURED: Type.STRUCTURED,
+    SymbolType.UIT: Type.FUND,
+}
+
 
 class StockScreener(Screener):
+    """Stock screener for querying stocks from TradingView."""
 
     def __init__(self):
         super().__init__()
-        # subtype = "stock"
         self.markets = [default_market]
-
         self.url = get_url("global")
-        self.specific_fields = StockField  # {**self.columns, **tvdata.stock['columns']}
+        self.specific_fields = StockField
         self.sort_by(default_sort_stocks, False)
 
     def _build_payload(self, requested_columns_):
@@ -33,45 +45,31 @@ class StockScreener(Screener):
 
     def set_symbol_types(self, *symbol_types: SymbolType):
         """
-        Set the subtypes to be scanned
-        :param symbol_types: list of subtypes
-        :return: None
+        Set the symbol types to be scanned.
+
+        :param symbol_types: Symbol types to include in the screener results
+        :raises ValueError: If an unknown symbol type is provided
         """
+        # Validate all symbol types are known
+        unknown_types = [st for st in symbol_types if st not in SYMBOL_TYPE_TO_TYPE_MAP]
+        if unknown_types:
+            raise ValueError(f"Unknown symbol types: {unknown_types}")
 
-        # If subtype is COMMON_STOCK, add STOCK to types
-        if SymbolType.COMMON_STOCK in symbol_types:
-            self._add_types(Type.STOCK)
+        # Collect unique Type values from symbol_types
+        types_to_add = {SYMBOL_TYPE_TO_TYPE_MAP[symbol_type] for symbol_type in symbol_types}
 
-        if SymbolType.DEPOSITORY_RECEIPT in symbol_types:
-            self._add_types(Type.DEPOSITORY_RECEIPT)
+        # Add Type filters (use IN_RANGE if multiple types, otherwise EQUAL)
+        if types_to_add:
+            self._add_types(*types_to_add)
 
-        if SymbolType.ETF in symbol_types:
-            self._add_types(Type.FUND)
-
-        if SymbolType.MUTUAL_FUND in symbol_types:
-            self._add_types(Type.FUND)
-
-        if SymbolType.REIT in symbol_types:
-            self._add_types(Type.FUND)
-
-        if SymbolType.PREFERRED_STOCK in symbol_types:
-            self._add_types(Type.STOCK)
-
-        if SymbolType.ETN in symbol_types:
-            self._add_types(Type.STRUCTURED)
-
-        if SymbolType.STRUCTURED in symbol_types:
-            self._add_types(Type.STRUCTURED)
-
-        if SymbolType.UIT in symbol_types:
-            self._add_types(Type.FUND)
-
-        # If subtype is COMMON_STOCK and DEPOSITARY_RECEIPT not in subtypes add DEPOSITARY_RECEIPT to subtypes
+        # Special case: COMMON_STOCK automatically includes DEPOSITORY_RECEIPT
+        # This maintains backward compatibility with existing behavior
+        symbol_types_list = list(symbol_types)
         if SymbolType.COMMON_STOCK in symbol_types and SymbolType.DEPOSITORY_RECEIPT not in symbol_types:
-            symbol_types = list(symbol_types)
-            symbol_types.append(SymbolType.DEPOSITORY_RECEIPT)
+            symbol_types_list.append(SymbolType.DEPOSITORY_RECEIPT)
 
-        for symbol_type in symbol_types:
+        # Add subtype filters
+        for symbol_type in symbol_types_list:
             self.add_filter(StockField.SUBTYPE, FilterOperator.IN_RANGE, symbol_type.value.copy())
 
     def set_markets(self, *markets: Market):

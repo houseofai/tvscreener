@@ -20,35 +20,36 @@ class Beautify:
                 self._format_column(specific_field, column)
 
     def _format_column(self, specific_field, column):
-        if specific_field.format is 'bool':
+        # Fixed: Use == for value comparison instead of 'is'
+        if specific_field.format == 'bool':
             self._to_bool(column)
-        elif specific_field.format is 'rating':
+        elif specific_field.format == 'rating':
             self._rating(column)
-        elif specific_field.format is 'round':
+        elif specific_field.format == 'round':
             self._round(column)
-        elif specific_field.format is 'percent':
+        elif specific_field.format == 'percent':
             self._percent(column)
         elif specific_field.has_recommendation():
             self._recommendation(column, specific_field)
-        elif specific_field.format is 'computed_recommendation':
-            # TODO
+        elif specific_field.format == 'computed_recommendation':
+            # TODO: Implement computed recommendation formatting
             pass
-        elif specific_field.format is 'text':
-            # TODO
+        elif specific_field.format == 'text':
+            # TODO: Implement text formatting
             pass
-        elif specific_field.format is 'date':
-            # TODO
+        elif specific_field.format == 'date':
+            # TODO: Implement date formatting
             pass
-        elif specific_field.format is 'missing':
-            # TODO
+        elif specific_field.format == 'missing':
+            # TODO: Implement missing value formatting
             pass
-        elif specific_field.format is 'currency':
-            # TODO
+        elif specific_field.format == 'currency':
+            # TODO: Implement currency formatting
             pass
-        elif specific_field.format is 'float':
-            # TODO
+        elif specific_field.format == 'float':
+            # TODO: Implement float formatting
             pass
-        elif specific_field.format is 'number_group':
+        elif specific_field.format == 'number_group':
             self._replace_nan(column)
             self._number_group(column)
         else:
@@ -78,5 +79,6 @@ class Beautify:
         self.df[column] = self.df[column].fillna(0)
 
     def _to_bool(self, column):
-        self.df[column] = self.df[column].apply(lambda x: True if x is 'true' else False)
+        # Fixed: Use == for value comparison instead of 'is'
+        self.df[column] = self.df[column].apply(lambda x: True if x == 'true' else False)
         self.df[column] = self.df[column].astype(bool)
