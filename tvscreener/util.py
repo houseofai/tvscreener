@@ -115,7 +115,7 @@ def get_recommendation(rating):
     Convert a numeric rating to a recommendation string.
 
     :param rating: Numeric rating value
-    :return: "SELL" for negative, "NEUTRAL" for zero, "BUY" for positive
+    :return: "S" (Sell) for negative, "N" (Neutral) for zero, "B" (Buy) for positive
     :raises ValueError: If rating is not a valid number
     """
     try:
@@ -124,8 +124,8 @@ def get_recommendation(rating):
         raise ValueError(f"Invalid rating: {rating}. Rating should be a number.")
 
     if rating < 0:
-        return "SELL"
+        return "S"  # Sell
     elif rating == 0:
-        return "NEUTRAL"
+        return "N"  # Neutral
     else:  # rating > 0
-        return "BUY"
+        return "B"  # Buy
