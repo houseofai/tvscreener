@@ -6,13 +6,17 @@ from tvscreener.field import Field, TimeInterval, add_historical, add_time_inter
 
 
 def format_historical_field(field_, time_interval, historical=1):
-    assert field_.historical, f"{field_} is not a historical field"
     """
     Format the technical field to the time interval
-    :param field_:
-    :param time_interval:
-    :return:
+    :param field_: Field to format
+    :param time_interval: Time interval for the field
+    :param historical: Historical offset (default 1)
+    :return: Formatted field name
+    :raises ValueError: If field is not a historical field
     """
+    # Fixed: Use proper exception instead of assert
+    if not field_.historical:
+        raise ValueError(f"{field_} is not a historical field")
     formatted_technical_field = add_historical(field_.field_name, historical)
 
     if field_.interval and time_interval != TimeInterval.ONE_DAY:
@@ -75,30 +79,53 @@ def _format_timed_fields(field_):
 
 
 def is_status_code_ok(response):
-    return response.status_code == 200
+    """Check if HTTP response status code indicates success."""
+    return response.ok  # Simplified: use built-in ok property
 
 
 def get_url(subtype):
     return f"https://scanner.tradingview.com/{subtype}/scan"
 
 
-millnames = ['', '', 'M', 'B', '']
+# Fixed: Use proper abbreviations including K for thousands
+millnames = ['', 'K', 'M', 'B', 'T']
 
 
 def millify(n):
-    n = float(n)
-    millidx = max(0, min(len(millnames) - 1,
-                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+    """
+    Convert a number to abbreviated form (e.g., 1000 -> 1.000K, 1000000 -> 1.000M).
 
-    return '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+    :param n: Number to convert
+    :return: String representation with abbreviation
+    """
+    n = float(n)
+    # Handle negative numbers
+    is_negative = n < 0
+    n = abs(n)
+
+    millidx = max(0, min(len(millnames) - 1,
+                         int(math.floor(0 if n == 0 else math.log10(n) / 3))))
+
+    result = '{:.3f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+    return '-' + result if is_negative else result
 
 
 def get_recommendation(rating):
-    if rating < 0:
-        return "S"
-    elif rating == 0:
-        return "N"
-    elif rating > 0:
-        return "B"
-    else:
+    """
+    Convert a numeric rating to a recommendation string.
+
+    :param rating: Numeric rating value
+    :return: "S" (Sell) for negative, "N" (Neutral) for zero, "B" (Buy) for positive
+    :raises ValueError: If rating is not a valid number
+    """
+    try:
+        rating = float(rating)
+    except (TypeError, ValueError):
         raise ValueError(f"Invalid rating: {rating}. Rating should be a number.")
+
+    if rating < 0:
+        return "S"  # Sell
+    elif rating == 0:
+        return "N"  # Neutral
+    else:  # rating > 0
+        return "B"  # Buy
